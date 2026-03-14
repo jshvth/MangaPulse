@@ -1,0 +1,148 @@
+@import "tailwindcss";
+@config "../tailwind.config.cjs";
+
+:root {
+  color-scheme: light;
+  --canvas: #f2f5f7;
+  --ink: #101826;
+  --accent: #ff6b4a;
+  --accent-soft: #ffd6c4;
+  --teal: #2f7f7a;
+  --moss: #8aa07a;
+  --haze: #e8eef2;
+  --mist: #f7fafb;
+  --card: rgba(255, 255, 255, 0.75);
+}
+
+body {
+  margin: 0;
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-optical-sizing: auto;
+  letter-spacing: 0.01em;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  background: var(--canvas);
+  color: var(--ink);
+  cursor: url('/cursor.svg') 8 8, auto;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+button,
+a,
+[role="button"],
+input,
+select,
+textarea,
+summary {
+  cursor: url('/cursor-pointer.svg') 8 8, pointer;
+}
+
+.glass-card {
+  border: 1px solid rgba(16, 24, 38, 0.08);
+  background: var(--card);
+  backdrop-filter: blur(24px);
+  box-shadow: 0 30px 70px -40px rgba(16, 24, 38, 0.45);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid rgba(16, 24, 38, 0.1);
+  background: rgba(255, 255, 255, 0.85);
+  color: rgba(16, 24, 38, 0.78);
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  padding: 0.5rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  background: var(--accent);
+  color: #fff;
+  transition: all 150ms ease;
+}
+
+.btn-primary:hover {
+  filter: brightness(0.95);
+}
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  padding: 0.5rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border: 1px solid rgba(16, 24, 38, 0.15);
+  background: rgba(255, 255, 255, 0.7);
+  color: rgba(16, 24, 38, 0.85);
+  transition: all 150ms ease;
+}
+
+.btn-ghost:hover {
+  border-color: rgba(16, 24, 38, 0.3);
+  color: var(--ink);
+}
+
+.input-field {
+  width: 100%;
+  border-radius: 1rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  color: var(--ink);
+  border: 1px solid rgba(16, 24, 38, 0.12);
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 8px 20px -16px rgba(16, 24, 38, 0.35);
+  outline: none;
+  transition: all 150ms ease;
+}
+
+.input-field:focus {
+  border-color: rgba(255, 107, 74, 0.5);
+  box-shadow: 0 0 0 4px rgba(255, 107, 74, 0.18);
+}
+
+.label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(16, 24, 38, 0.5);
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(circle at 10% 20%, rgba(255, 107, 74, 0.16), transparent 42%),
+    radial-gradient(circle at 85% 12%, rgba(47, 127, 122, 0.18), transparent 45%),
+    radial-gradient(circle at 50% 85%, rgba(138, 160, 122, 0.18), transparent 45%),
+    linear-gradient(120deg, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0));
+  pointer-events: none;
+  z-index: -2;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: radial-gradient(rgba(16, 24, 38, 0.05) 1px, transparent 1px);
+  background-size: 110px 110px;
+  opacity: 0.3;
+  pointer-events: none;
+  z-index: -1;
+}

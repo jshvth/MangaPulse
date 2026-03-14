@@ -1,0 +1,23 @@
+# Node
+node_modules/
+
+# Vite/React build
+frontend/dist/
+frontend/.vite/
+
+# Env files
+.env
+.env.*
+
+# Supabase local
+supabase/.env
+supabase/.temp/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+
+# Local MCP config with secrets
+.vscode/mcp.json
