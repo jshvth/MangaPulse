@@ -41,6 +41,7 @@ psql "<your-connection-string>" -f supabase/cron/release_check.sql
 **Edge Function Config**
 - `MIN_DAYS_BETWEEN_CHECKS` default is 3
 - `JIKAN_DELAY_MS` default is 500
+- Optional: `GOOGLE_BOOKS_API_KEY` for release dates
 
 **MCP Server (optional)**
 1. Install deps

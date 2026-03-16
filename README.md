@@ -17,6 +17,7 @@ MangaPulse is a KI-native web app for tracking manga collections and surfacing n
 **Data Sources**
 - Jikan (MyAnimeList data)
 - AniList GraphQL
+- Google Books (optional release dates)
 
 **Tech Stack**
 - Frontend: React (Vite) + TypeScript + Tailwind

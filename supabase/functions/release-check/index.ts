@@ -13,6 +13,10 @@ const SUPABASE_URL = Deno.env.get("MP_SUPABASE_URL");
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("MP_SUPABASE_SERVICE_ROLE_KEY");
 const JIKAN_BASE_URL = Deno.env.get("JIKAN_BASE_URL") ?? "https://api.jikan.moe/v4";
 const JIKAN_DELAY_MS = Number(Deno.env.get("JIKAN_DELAY_MS") ?? 500);
+const GOOGLE_BOOKS_BASE_URL =
+  Deno.env.get("GOOGLE_BOOKS_BASE_URL") ?? "https://www.googleapis.com/books/v1";
+const GOOGLE_BOOKS_API_KEY = Deno.env.get("GOOGLE_BOOKS_API_KEY");
+const GOOGLE_BOOKS_MAX_RESULTS = Number(Deno.env.get("GOOGLE_BOOKS_MAX_RESULTS") ?? 10);
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 const RESEND_FROM_EMAIL = Deno.env.get("RESEND_FROM_EMAIL");
@@ -47,6 +51,22 @@ type AniListManga = {
   title: string;
   volumes: number | null;
   url?: string | null;
+};
+
+type GoogleBookItem = {
+  volumeInfo?: {
+    title?: string;
+    subtitle?: string;
+    publishedDate?: string;
+    infoLink?: string;
+    canonicalVolumeLink?: string;
+  };
+};
+
+type UpcomingRelease = {
+  volume: number;
+  releaseDate: string;
+  sourceUrl: string | null;
 };
 
 const ANILIST_ID_QUERY = `
@@ -148,6 +168,85 @@ async function searchAniListByTitle(title: string): Promise<AniListManga | null>
     volumes: hit.volumes ?? null,
     url: hit.siteUrl ?? null,
   };
+}
+
+function normalizeText(value: string) {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+}
+
+function extractVolumeNumber(text: string): number | null {
+  const match = text.match(/\b(?:vol(?:ume)?|volume|vol\.|v\.|no\.?)\s*([0-9]{1,3})\b/i);
+  if (!match) return null;
+  const value = Number(match[1]);
+  if (!Number.isFinite(value)) return null;
+  return value;
+}
+
+function lastDayOfMonth(year: number, month: number) {
+  return new Date(year, month, 0).getDate();
+}
+
+function parsePublishedDate(dateStr: string): string | null {
+  if (!dateStr) return null;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+  if (/^\d{4}-\d{2}$/.test(dateStr)) {
+    const [yearStr, monthStr] = dateStr.split("-");
+    const year = Number(yearStr);
+    const month = Number(monthStr);
+    if (!year || !month) return null;
+    const day = lastDayOfMonth(year, month);
+    return `${yearStr}-${monthStr.padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+  }
+  if (/^\d{4}$/.test(dateStr)) {
+    return `${dateStr}-12-31`;
+  }
+  return null;
+}
+
+async function fetchGoogleBooks(title: string): Promise<GoogleBookItem[]> {
+  const params = new URLSearchParams();
+  params.set("q", `intitle:${title} manga`);
+  params.set("printType", "books");
+  params.set("maxResults", String(GOOGLE_BOOKS_MAX_RESULTS));
+  if (GOOGLE_BOOKS_API_KEY) {
+    params.set("key", GOOGLE_BOOKS_API_KEY);
+  }
+
+  const res = await fetch(`${GOOGLE_BOOKS_BASE_URL}/volumes?${params.toString()}`);
+  if (!res.ok) return [];
+  const body = await res.json();
+  return body?.items ?? [];
+}
+
+function findUpcomingFromGoogleBooks(
+  title: string,
+  minVolume: number,
+  items: GoogleBookItem[]
+): UpcomingRelease[] {
+  const normalizedTitle = normalizeText(title);
+  const results: UpcomingRelease[] = [];
+
+  for (const item of items) {
+    const info = item.volumeInfo;
+    if (!info?.title) continue;
+    const combined = `${info.title} ${info.subtitle ?? ""}`.trim();
+    const normalizedCombined = normalizeText(combined);
+    if (!normalizedCombined.includes(normalizedTitle)) continue;
+
+    const volume = extractVolumeNumber(combined);
+    if (!volume || volume < minVolume) continue;
+
+    const releaseDate = parsePublishedDate(info.publishedDate ?? "");
+    if (!releaseDate) continue;
+
+    results.push({
+      volume,
+      releaseDate,
+      sourceUrl: info.canonicalVolumeLink ?? info.infoLink ?? null,
+    });
+  }
+
+  return results.sort((a, b) => a.volume - b.volume);
 }
 
 async function enqueueNotifications(
@@ -275,7 +374,9 @@ Deno.serve(async (req) => {
 
   const { data: mangas, error } = await supabase
     .from("user_mangas")
-    .select("id, user_id, title, mal_id, source, source_id, latest_volume, last_checked_at");
+    .select(
+      "id, user_id, title, mal_id, source, source_id, latest_volume, current_volume, last_checked_at"
+    );
 
   if (error) {
     console.error("DB error:", error);
@@ -375,6 +476,35 @@ Deno.serve(async (req) => {
             release_id: row.id,
           }))
         );
+      }
+    }
+
+    if (manga.title) {
+      const baseVolume = Math.max(manga.latest_volume ?? 0, manga.current_volume ?? 0);
+      const minVolume = baseVolume + 1;
+      const googleItems = await fetchGoogleBooks(manga.title);
+      const upcoming = findUpcomingFromGoogleBooks(manga.title, minVolume, googleItems);
+      const todayIso = new Date().toISOString().slice(0, 10);
+      const upcomingFiltered = upcoming.filter((item) => item.releaseDate >= todayIso);
+
+      if (upcomingFiltered.length) {
+        const { data: inserted, error: insertError } = await supabase
+          .from("manga_releases")
+          .upsert(
+            upcomingFiltered.map((item) => ({
+              user_manga_id: manga.id,
+              volume: item.volume,
+              release_date: item.releaseDate,
+              source: "google_books",
+              source_url: item.sourceUrl,
+            })),
+            { onConflict: "user_manga_id,volume" }
+          )
+          .select("id, user_manga_id");
+
+        if (!insertError && inserted?.length) {
+          releasesCreated += inserted.length;
+        }
       }
     }
 

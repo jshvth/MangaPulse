@@ -10,14 +10,16 @@ MangaPulse uses a React frontend, Supabase for auth + storage, and a scheduled E
 **Data Sources**
 - Jikan API (MyAnimeList) for volumes + MAL IDs
 - AniList GraphQL for fallback volumes + metadata
+- Google Books for optional volume release dates
 
 **Release Flow**
 1. Cron triggers `release-check` every 3 days
 2. Function reads all `user_mangas`
 3. Jikan + AniList are queried and merged
-4. New releases are inserted into `manga_releases`
-5. `needs_notification` is set when a new volume is found
-6. If a `manga_releases.release_date` is due, the manga is flagged for notification
+4. Google Books (optional) checks for upcoming volume release dates
+5. New releases are inserted into `manga_releases`
+6. `needs_notification` is set when a new volume is found
+7. If a `manga_releases.release_date` is due, the manga is flagged for notification
 
 **Cron Logic**
 - `pg_cron` runs at `0 9 */3 * *` (09:00 UTC every 3 days)
