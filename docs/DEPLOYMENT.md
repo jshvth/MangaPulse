@@ -11,7 +11,7 @@ This project is designed for Vercel (frontend) + Supabase (backend).
 **Vercel Environment Variables**
 - `VITE_SUPABASE_URL`
 - `VITE_SUPABASE_ANON_KEY`
-- Optional: `VITE_GOOGLE_PLACES_KEY`
+- Optional: `VITE_GOOGLE_PLACES_KEY` (enables location-based bookstores)
 
 After setting variables, trigger a new deploy.
 

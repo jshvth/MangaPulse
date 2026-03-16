@@ -20,7 +20,7 @@ const RESEND_BASE_URL = Deno.env.get("RESEND_BASE_URL") ?? "https://api.resend.c
 const NOTIFICATION_BATCH_LIMIT = Number(
   Deno.env.get("NOTIFICATION_BATCH_LIMIT") ?? 200
 );
-const MIN_DAYS_BETWEEN_CHECKS = Number(Deno.env.get("MIN_DAYS_BETWEEN_CHECKS") ?? 5);
+const MIN_DAYS_BETWEEN_CHECKS = Number(Deno.env.get("MIN_DAYS_BETWEEN_CHECKS") ?? 3);
 
 const ANILIST_ENDPOINT = "https://graphql.anilist.co";
 

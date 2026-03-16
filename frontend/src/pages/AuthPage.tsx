@@ -44,7 +44,7 @@ export function AuthPage() {
           <div className="grid gap-4 rounded-3xl bg-white/10 p-6">
             <div className="flex items-center justify-between">
               <p className="text-sm text-white/70">Live pulse</p>
-              <span className="chip border-white/40 bg-white/10 text-white/80">Next check in 5 days</span>
+              <span className="chip border-white/40 bg-white/10 text-white/80">Next check in 3 days</span>
             </div>
             <div className="flex items-center gap-3">
               <div className="h-2 w-2 rounded-full bg-accent" />

@@ -1,6 +1,6 @@
 # MangaPulse
 
-MangaPulse is a KI-native web app for tracking manga collections and surfacing new releases on a 5-day cadence. It combines Jikan + AniList data, stores your library in Supabase, and surfaces new-volume signals in the UI.
+MangaPulse is a KI-native web app for tracking manga collections and surfacing new releases on a 3-day cadence. It combines Jikan + AniList data, stores your library in Supabase, and surfaces new-volume signals in the UI.
 
 **Docs**
 - `docs/SETUP.md`

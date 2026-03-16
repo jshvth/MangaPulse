@@ -158,7 +158,7 @@ export function CollectionPage() {
               <p className="text-xs uppercase tracking-[0.2em] text-ink/50">
                 Next scan
               </p>
-              <p className="mt-2 text-2xl font-semibold text-ink">In 5 days</p>
+              <p className="mt-2 text-2xl font-semibold text-ink">In 3 days</p>
             </div>
             <div className="rounded-2xl border border-ink/10 bg-white/80 p-4">
               <p className="text-xs uppercase tracking-[0.2em] text-ink/50">

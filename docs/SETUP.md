@@ -39,7 +39,7 @@ psql "<your-connection-string>" -f supabase/cron/release_check.sql
 ```
 
 **Edge Function Config**
-- `MIN_DAYS_BETWEEN_CHECKS` default is 5
+- `MIN_DAYS_BETWEEN_CHECKS` default is 3
 - `JIKAN_DELAY_MS` default is 500
 
 **MCP Server (optional)**
