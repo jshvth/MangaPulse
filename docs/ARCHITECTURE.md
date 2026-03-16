@@ -17,6 +17,7 @@ MangaPulse uses a React frontend, Supabase for auth + storage, and a scheduled E
 3. Jikan + AniList are queried and merged
 4. New releases are inserted into `manga_releases`
 5. `needs_notification` is set when a new volume is found
+6. If a `manga_releases.release_date` is due, the manga is flagged for notification
 
 **Cron Logic**
 - `pg_cron` runs at `0 9 */3 * *` (09:00 UTC every 3 days)

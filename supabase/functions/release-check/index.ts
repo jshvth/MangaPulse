@@ -286,6 +286,7 @@ Deno.serve(async (req) => {
   let checked = 0;
   let skipped = 0;
   let releasesCreated = 0;
+  let dateTriggered = 0;
 
   for (const manga of mangas ?? []) {
     const lastCheckedAt = manga.last_checked_at
@@ -400,12 +401,35 @@ Deno.serve(async (req) => {
 
   const notificationResult = await sendPendingNotifications();
 
+  const todayIso = new Date().toISOString().slice(0, 10);
+  const { data: dueReleases } = await supabase
+    .from("manga_releases")
+    .select("user_manga_id")
+    .not("release_date", "is", null)
+    .lte("release_date", todayIso);
+
+  const dueIds = Array.from(
+    new Set((dueReleases ?? []).map((row) => row.user_manga_id))
+  );
+
+  if (dueIds.length) {
+    const { error: dueError } = await supabase
+      .from("user_mangas")
+      .update({ needs_notification: true })
+      .in("id", dueIds);
+
+    if (!dueError) {
+      dateTriggered = dueIds.length;
+    }
+  }
+
   return json({
     ok: true,
     checked,
     skipped,
     updated,
     releasesCreated,
+    dateTriggered,
     notifications: notificationResult,
   });
 });

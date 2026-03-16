@@ -29,6 +29,11 @@ export function MangaDetailPage() {
   const [releases, setReleases] = useState<ReleaseEntry[]>([]);
   const [releasesLoading, setReleasesLoading] = useState(false);
   const [releasesError, setReleasesError] = useState<string | null>(null);
+  const [upcomingVolume, setUpcomingVolume] = useState("");
+  const [upcomingDate, setUpcomingDate] = useState("");
+  const [upcomingSaving, setUpcomingSaving] = useState(false);
+  const [upcomingNotice, setUpcomingNotice] = useState<string | null>(null);
+  const [upcomingError, setUpcomingError] = useState<string | null>(null);
   const [places, setPlaces] = useState<PlaceEntry[]>([]);
   const [placesStatus, setPlacesStatus] = useState<"idle" | "loading" | "ready" | "error">(
     "idle"
@@ -42,6 +47,16 @@ export function MangaDetailPage() {
     return Math.min((entry.ownedVolumes / entry.totalVolumes) * 100, 100);
   }, [entry]);
 
+  const fetchReleases = async (mangaId: string) => {
+    const { data, error } = await supabase
+      .from("manga_releases")
+      .select("id, volume, release_date, source, source_url, created_at")
+      .eq("user_manga_id", mangaId)
+      .order("volume", { ascending: false })
+      .limit(10);
+    return { data: data ?? [], error };
+  };
+
   useEffect(() => {
     if (!entry) return;
     let alive = true;
@@ -49,12 +64,7 @@ export function MangaDetailPage() {
     const loadReleases = async () => {
       setReleasesLoading(true);
       setReleasesError(null);
-      const { data, error } = await supabase
-        .from("manga_releases")
-        .select("id, volume, release_date, source, source_url, created_at")
-        .eq("user_manga_id", entry.id)
-        .order("volume", { ascending: false })
-        .limit(10);
+      const { data, error } = await fetchReleases(entry.id);
 
       if (!alive) return;
       if (error) {
@@ -71,6 +81,15 @@ export function MangaDetailPage() {
       alive = false;
     };
   }, [entry?.id]);
+
+  useEffect(() => {
+    if (!entry) return;
+    if (upcomingVolume) return;
+    const suggested = Math.max(entry.ownedVolumes, entry.totalVolumes ?? 0) + 1;
+    if (Number.isFinite(suggested) && suggested > 0) {
+      setUpcomingVolume(String(suggested));
+    }
+  }, [entry?.id, upcomingVolume]);
 
   if (!entry) {
     return (
@@ -97,6 +116,52 @@ export function MangaDetailPage() {
       : "TBA";
     return { ...item, dateLabel };
   });
+
+  const handleSaveUpcoming = async () => {
+    if (!entry) return;
+    const volumeValue = Number(upcomingVolume);
+    if (!volumeValue || volumeValue < 1) {
+      setUpcomingError("Please enter a valid volume number.");
+      return;
+    }
+    if (!upcomingDate) {
+      setUpcomingError("Please select a release date.");
+      return;
+    }
+
+    setUpcomingSaving(true);
+    setUpcomingError(null);
+    setUpcomingNotice(null);
+
+    const { error } = await supabase
+      .from("manga_releases")
+      .upsert(
+        {
+          user_manga_id: entry.id,
+          volume: volumeValue,
+          release_date: upcomingDate,
+          source: "manual",
+          source_url: entry.url,
+        },
+        { onConflict: "user_manga_id,volume" }
+      );
+
+    if (error) {
+      setUpcomingError(error.message);
+      setUpcomingSaving(false);
+      return;
+    }
+
+    const { data, error: reloadError } = await fetchReleases(entry.id);
+    if (reloadError) {
+      setReleasesError(reloadError.message);
+    } else {
+      setReleases(data ?? []);
+    }
+
+    setUpcomingNotice("Upcoming release saved.");
+    setUpcomingSaving(false);
+  };
 
   const loadGooglePlaces = () =>
     new Promise<void>((resolve, reject) => {
@@ -294,6 +359,52 @@ export function MangaDetailPage() {
                 </button>
               </div>
             </div>
+
+            <div className="rounded-3xl border border-ink/10 bg-white/70 p-5">
+              <p className="label">Upcoming</p>
+              <p className="text-sm text-ink/60">
+                Add an announced volume and its release date.
+              </p>
+              <div className="mt-4 grid gap-3">
+                <input
+                  className="input-field"
+                  type="number"
+                  min={1}
+                  value={upcomingVolume}
+                  onChange={(event) => {
+                    setUpcomingVolume(event.target.value);
+                    setUpcomingError(null);
+                  }}
+                  placeholder="Volume #"
+                />
+                <input
+                  className="input-field"
+                  type="date"
+                  value={upcomingDate}
+                  onChange={(event) => {
+                    setUpcomingDate(event.target.value);
+                    setUpcomingError(null);
+                  }}
+                />
+                <button
+                  className="btn-primary"
+                  onClick={handleSaveUpcoming}
+                  disabled={upcomingSaving}
+                >
+                  {upcomingSaving ? "Saving..." : "Save upcoming release"}
+                </button>
+                {upcomingError && (
+                  <div className="rounded-2xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+                    {upcomingError}
+                  </div>
+                )}
+                {upcomingNotice && (
+                  <div className="rounded-2xl border border-ink/10 bg-white/70 px-3 py-2 text-xs text-ink/70">
+                    {upcomingNotice}
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
 
@@ -302,8 +413,8 @@ export function MangaDetailPage() {
             <p className="label">Nearby bookstores</p>
             <h3 className="font-display text-2xl">Find a shop within 30km</h3>
             <p className="text-sm text-ink/60">
-              Connect the Places API to get live availability near you. We can
-              wire this once you have a Google Maps key.
+              Connect the Places API to get live availability near you. Add
+              your Google Maps key to activate the search.
             </p>
 
           <div className="mt-6 grid gap-3 rounded-3xl border border-dashed border-ink/20 bg-white/70 p-5">

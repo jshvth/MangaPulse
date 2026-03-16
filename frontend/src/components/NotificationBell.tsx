@@ -48,10 +48,12 @@ export function NotificationBell() {
 
     const load = async () => {
       setLoading(true);
+      const todayIso = new Date().toISOString().slice(0, 10);
       const { data } = await supabase
         .from("manga_releases")
         .select("id, user_manga_id, volume, release_date, source, source_url, created_at")
         .in("user_manga_id", pendingIds)
+        .or(`release_date.is.null,release_date.lte.${todayIso}`)
         .order("volume", { ascending: false });
 
       if (!active) return;
