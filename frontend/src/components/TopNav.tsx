@@ -1,5 +1,6 @@
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { NotificationBell } from "./NotificationBell";
 
 export function TopNav() {
   const { isAuthed, signOut, user } = useAuth();
@@ -34,6 +35,7 @@ export function TopNav() {
         </NavLink>
         {isAuthed ? (
           <div className="flex items-center gap-4">
+            <NotificationBell />
             <span className="text-xs text-ink/50">{user?.email}</span>
             <button
               onClick={async () => {
