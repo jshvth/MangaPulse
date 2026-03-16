@@ -7,7 +7,7 @@ export function TopNav() {
   const navigate = useNavigate();
 
   return (
-    <nav className="glass-card reveal flex items-center justify-between rounded-3xl px-6 py-4">
+    <nav className="glass-card reveal relative z-50 flex items-center justify-between rounded-3xl px-6 py-4">
       <Link to="/" className="flex items-center gap-3 transition hover:-translate-y-0.5">
         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-ink text-white shadow-[0_10px_24px_-16px_rgba(16,24,38,0.8)]">
           MP

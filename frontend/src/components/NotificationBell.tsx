@@ -101,7 +101,7 @@ export function NotificationBell() {
       </button>
 
       {open && (
-        <div className="glass-card reveal absolute right-0 mt-3 w-80 max-w-[calc(100vw-2rem)] rounded-3xl p-4">
+        <div className="glass-card reveal absolute right-0 z-50 mt-3 w-80 max-w-[calc(100vw-2rem)] rounded-3xl p-4">
           <div className="flex items-center justify-between">
             <div>
               <p className="label">Notifications</p>
