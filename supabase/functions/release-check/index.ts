@@ -20,6 +20,7 @@ const RESEND_BASE_URL = Deno.env.get("RESEND_BASE_URL") ?? "https://api.resend.c
 const NOTIFICATION_BATCH_LIMIT = Number(
   Deno.env.get("NOTIFICATION_BATCH_LIMIT") ?? 200
 );
+const MIN_DAYS_BETWEEN_CHECKS = Number(Deno.env.get("MIN_DAYS_BETWEEN_CHECKS") ?? 5);
 
 const ANILIST_ENDPOINT = "https://graphql.anilist.co";
 
@@ -274,7 +275,7 @@ Deno.serve(async (req) => {
 
   const { data: mangas, error } = await supabase
     .from("user_mangas")
-    .select("id, user_id, title, mal_id, source, source_id, latest_volume");
+    .select("id, user_id, title, mal_id, source, source_id, latest_volume, last_checked_at");
 
   if (error) {
     console.error("DB error:", error);
@@ -283,9 +284,19 @@ Deno.serve(async (req) => {
 
   let updated = 0;
   let checked = 0;
+  let skipped = 0;
   let releasesCreated = 0;
 
   for (const manga of mangas ?? []) {
+    const lastCheckedAt = manga.last_checked_at
+      ? Date.parse(manga.last_checked_at)
+      : null;
+    const minIntervalMs = MIN_DAYS_BETWEEN_CHECKS * 24 * 60 * 60 * 1000;
+    if (lastCheckedAt && Date.now() - lastCheckedAt < minIntervalMs) {
+      skipped += 1;
+      continue;
+    }
+
     checked += 1;
     let jikan: JikanManga | null = null;
     let anilist: AniListManga | null = null;
@@ -392,6 +403,7 @@ Deno.serve(async (req) => {
   return json({
     ok: true,
     checked,
+    skipped,
     updated,
     releasesCreated,
     notifications: notificationResult,

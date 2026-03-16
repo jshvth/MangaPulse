@@ -91,7 +91,7 @@ export function MangaDetailPage() {
       </Link>
 
       <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-        <div className="glass-card rounded-[32px] p-6 md:p-8">
+        <div className="glass-card reveal rounded-[32px] p-6 md:p-8">
           <div className="flex flex-col gap-6 md:flex-row md:items-center">
             <img
               src={entry.image ?? "/placeholder-cover.svg"}
@@ -187,7 +187,7 @@ export function MangaDetailPage() {
         </div>
 
         <div className="space-y-6">
-          <div className="glass-card rounded-[32px] p-6 md:p-8">
+          <div className="glass-card reveal reveal-delay-1 rounded-[32px] p-6 md:p-8">
             <p className="label">Nearby bookstores</p>
             <h3 className="font-display text-2xl">Find a shop within 30km</h3>
             <p className="text-sm text-ink/60">
@@ -224,7 +224,7 @@ export function MangaDetailPage() {
             </div>
           </div>
 
-          <div className="glass-card rounded-[32px] p-6 md:p-8">
+          <div className="glass-card reveal reveal-delay-2 rounded-[32px] p-6 md:p-8">
             <p className="label">Release history</p>
             <h3 className="font-display text-2xl">Latest volumes found</h3>
             <p className="text-sm text-ink/60">

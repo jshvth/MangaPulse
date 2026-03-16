@@ -55,7 +55,7 @@ export function CollectionPage() {
 
   return (
     <div className="space-y-8">
-      <section className="flex flex-wrap items-end justify-between gap-4">
+      <section className="reveal flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="label">Collection</p>
           <h2 className="font-display text-3xl">Your manga shelf</h2>
@@ -75,7 +75,7 @@ export function CollectionPage() {
         </div>
       </section>
 
-      <section className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+      <section className="reveal reveal-delay-1 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
         <div className="glass-card rounded-[32px] p-6 md:p-8">
           <div className="flex items-center justify-between">
             <div>
@@ -180,7 +180,7 @@ export function CollectionPage() {
         </div>
       </section>
 
-      <section className="space-y-4">
+      <section className="reveal reveal-delay-2 space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="font-display text-2xl">Collection overview</h3>
           <span className="text-sm text-ink/50">Click a card for details</span>

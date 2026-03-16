@@ -14,6 +14,10 @@ MangaPulse is a KI-native web app for tracking manga collections and surfacing n
 - Supabase Auth + Postgres persistence
 - Edge Function release scan (cron)
 
+**Data Sources**
+- Jikan (MyAnimeList data)
+- AniList GraphQL
+
 **Tech Stack**
 - Frontend: React (Vite) + TypeScript + Tailwind
 - Backend: Supabase (Postgres + Auth)

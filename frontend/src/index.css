@@ -46,6 +46,8 @@ summary {
   background: var(--card);
   backdrop-filter: blur(24px);
   box-shadow: 0 30px 70px -40px rgba(16, 24, 38, 0.45);
+  transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
+  will-change: transform;
 }
 
 .chip {
@@ -72,10 +74,12 @@ summary {
   background: var(--accent);
   color: #fff;
   transition: all 150ms ease;
+  box-shadow: 0 12px 30px -18px rgba(255, 107, 74, 0.8);
 }
 
 .btn-primary:hover {
   filter: brightness(0.95);
+  transform: translateY(-1px);
 }
 
 .btn-ghost {
@@ -95,6 +99,7 @@ summary {
 .btn-ghost:hover {
   border-color: rgba(16, 24, 38, 0.3);
   color: var(--ink);
+  transform: translateY(-1px);
 }
 
 .input-field {
@@ -145,4 +150,55 @@ body::after {
   opacity: 0.3;
   pointer-events: none;
   z-index: -1;
+}
+
+@keyframes floatIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes drift {
+  0% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-16px) scale(1.02);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+
+.reveal {
+  animation: floatIn 600ms ease both;
+}
+
+.reveal-delay-1 {
+  animation-delay: 120ms;
+}
+
+.reveal-delay-2 {
+  animation-delay: 240ms;
+}
+
+.reveal-delay-3 {
+  animation-delay: 360ms;
+}
+
+.orb {
+  animation: drift 14s ease-in-out infinite;
+}
+
+.orb-slow {
+  animation-duration: 18s;
+}
+
+.orb-fast {
+  animation-duration: 10s;
 }
