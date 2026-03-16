@@ -46,8 +46,14 @@ summary {
   background: var(--card);
   backdrop-filter: blur(24px);
   box-shadow: 0 30px 70px -40px rgba(16, 24, 38, 0.45);
-  transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
+  transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
   will-change: transform;
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 40px 90px -50px rgba(16, 24, 38, 0.55);
+  border-color: rgba(16, 24, 38, 0.14);
 }
 
 .chip {
@@ -155,11 +161,11 @@ body::after {
 @keyframes floatIn {
   from {
     opacity: 0;
-    transform: translateY(14px);
+    transform: translateY(10px) scale(0.99);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
   }
 }
 
@@ -176,7 +182,7 @@ body::after {
 }
 
 .reveal {
-  animation: floatIn 600ms ease both;
+  animation: floatIn 520ms cubic-bezier(0.2, 0.65, 0.25, 1) both;
 }
 
 .reveal-delay-1 {
@@ -192,7 +198,7 @@ body::after {
 }
 
 .orb {
-  animation: drift 14s ease-in-out infinite;
+  animation: drift 16s ease-in-out infinite;
 }
 
 .orb-slow {
@@ -200,5 +206,12 @@ body::after {
 }
 
 .orb-fast {
-  animation-duration: 10s;
+  animation-duration: 12s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
 }

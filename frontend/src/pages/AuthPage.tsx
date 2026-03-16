@@ -29,7 +29,7 @@ export function AuthPage() {
 
   return (
     <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr]">
-      <section className="reveal rounded-[32px] bg-ink p-10 text-white shadow-[0_30px_70px_-40px_rgba(16,24,38,0.6)]">
+      <section className="reveal hover-lift rounded-[32px] bg-ink p-10 text-white shadow-[0_30px_70px_-40px_rgba(16,24,38,0.6)]">
         <div className="flex h-full flex-col justify-between gap-10">
           <div className="space-y-6">
             <p className="label text-white/60">MANGAPULSE</p>
@@ -54,7 +54,7 @@ export function AuthPage() {
         </div>
       </section>
 
-      <section className="glass-card reveal reveal-delay-1 rounded-[32px] p-8 md:p-10">
+      <section className="glass-card hover-lift reveal reveal-delay-1 rounded-[32px] p-8 md:p-10">
         <div className="space-y-8">
           <div>
             <p className="label">Account</p>

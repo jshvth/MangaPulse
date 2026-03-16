@@ -76,7 +76,7 @@ export function CollectionPage() {
       </section>
 
       <section className="reveal reveal-delay-1 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-        <div className="glass-card rounded-[32px] p-6 md:p-8">
+        <div className="glass-card hover-lift rounded-[32px] p-6 md:p-8">
           <div className="flex items-center justify-between">
             <div>
               <p className="label">Add new</p>
@@ -147,7 +147,7 @@ export function CollectionPage() {
           )}
         </div>
 
-        <div className="glass-card rounded-[32px] p-6 md:p-8">
+        <div className="glass-card hover-lift rounded-[32px] p-6 md:p-8">
           <p className="label">Pulse</p>
           <h3 className="font-display text-2xl">Release readiness</h3>
           <p className="text-sm text-ink/60">
