@@ -40,6 +40,7 @@ export function MangaDetailPage() {
   );
   const [placesError, setPlacesError] = useState<string | null>(null);
   const googleKey = (import.meta as any).env?.VITE_GOOGLE_PLACES_KEY as string | undefined;
+  const amazonDomain = (import.meta as any).env?.VITE_AMAZON_DOMAIN as string | undefined;
 
   const progress = useMemo(() => {
     if (!entry) return 0;
@@ -102,7 +103,21 @@ export function MangaDetailPage() {
     );
   }
 
-  const amazonUrl = `https://www.amazon.com/s?k=${encodeURIComponent(
+  const resolvedAmazonDomain = useMemo(() => {
+    if (amazonDomain) return amazonDomain.replace(/^https?:\/\//, "");
+    if (typeof navigator === "undefined") return "amazon.de";
+    const locale = navigator.language?.toLowerCase() ?? "";
+    if (locale.startsWith("nl")) return "amazon.nl";
+    if (locale.startsWith("de")) return "amazon.de";
+    if (locale.startsWith("en-gb")) return "amazon.co.uk";
+    if (locale.startsWith("en-us")) return "amazon.com";
+    if (locale.startsWith("fr")) return "amazon.fr";
+    if (locale.startsWith("it")) return "amazon.it";
+    if (locale.startsWith("es")) return "amazon.es";
+    return "amazon.de";
+  }, [amazonDomain]);
+
+  const amazonUrl = `https://${resolvedAmazonDomain}/s?k=${encodeURIComponent(
     `${entry.title} manga`
   )}`;
 
