@@ -254,8 +254,8 @@ export function ProfilePage() {
                 setProfile((prev) => ({ ...prev, display_name: event.target.value }))
               }
             />
-            <div className="flex items-center gap-4 rounded-3xl border border-ink/10 bg-white/70 p-4">
-              <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border border-ink/10 bg-white">
+            <div className="neo-panel flex items-center gap-4 rounded-3xl p-4">
+              <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border border-ink/10 bg-mist/80">
                 {profile.avatar_url ? (
                   <img
                     src={profile.avatar_url}
@@ -331,7 +331,7 @@ export function ProfilePage() {
               value={profile.bio}
               onChange={(event) => setProfile((prev) => ({ ...prev, bio: event.target.value }))}
             />
-            <div className="rounded-2xl border border-ink/10 bg-white/70 p-4 text-sm text-ink/60">
+            <div className="neo-panel rounded-2xl p-4 text-sm text-ink/70">
               Tip: Keep it short and personal.
             </div>
           </div>
@@ -384,12 +384,12 @@ export function ProfilePage() {
               Following ({following.length})
             </p>
             {socialLoading && (
-              <div className="rounded-2xl border border-ink/10 bg-white/70 p-3 text-sm text-ink/60">
+              <div className="neo-panel rounded-2xl p-3 text-sm text-ink/70">
                 Loading...
               </div>
             )}
             {!socialLoading && following.length === 0 && (
-              <div className="rounded-2xl border border-ink/10 bg-white/70 p-3 text-sm text-ink/60">
+              <div className="neo-panel rounded-2xl p-3 text-sm text-ink/70">
                 You are not following anyone yet.
               </div>
             )}
@@ -397,9 +397,9 @@ export function ProfilePage() {
               <Link
                 key={item.user_id}
                 to={`/profiles/${item.user_id}`}
-                className="flex items-center gap-3 rounded-2xl border border-ink/10 bg-white/80 p-3"
+                className="neo-panel flex items-center gap-3 rounded-2xl p-3"
               >
-                <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-ink/10 bg-white">
+                <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-ink/10 bg-mist/80">
                   {item.avatar_url ? (
                     <img
                       src={item.avatar_url}
@@ -429,12 +429,12 @@ export function ProfilePage() {
               Followers ({followers.length})
             </p>
             {socialLoading && (
-              <div className="rounded-2xl border border-ink/10 bg-white/70 p-3 text-sm text-ink/60">
+              <div className="neo-panel rounded-2xl p-3 text-sm text-ink/70">
                 Loading...
               </div>
             )}
             {!socialLoading && followers.length === 0 && (
-              <div className="rounded-2xl border border-ink/10 bg-white/70 p-3 text-sm text-ink/60">
+              <div className="neo-panel rounded-2xl p-3 text-sm text-ink/70">
                 No followers yet.
               </div>
             )}
@@ -442,9 +442,9 @@ export function ProfilePage() {
               <Link
                 key={item.user_id}
                 to={`/profiles/${item.user_id}`}
-                className="flex items-center gap-3 rounded-2xl border border-ink/10 bg-white/80 p-3"
+                className="neo-panel flex items-center gap-3 rounded-2xl p-3"
               >
-                <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-ink/10 bg-white">
+                <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-ink/10 bg-mist/80">
                   {item.avatar_url ? (
                     <img
                       src={item.avatar_url}
@@ -477,7 +477,7 @@ export function ProfilePage() {
         </div>
       )}
       {notice && (
-        <div className="rounded-2xl border border-ink/10 bg-white/70 px-4 py-3 text-sm text-ink/70">
+        <div className="neo-panel rounded-2xl px-4 py-3 text-sm text-ink/70">
           {notice}
         </div>
       )}

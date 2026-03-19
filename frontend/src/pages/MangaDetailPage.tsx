@@ -507,17 +507,17 @@ export function MangaDetailPage() {
           </div>
 
           <div className="mt-8 grid gap-4 md:grid-cols-[1fr_1fr]">
-            <div className="rounded-3xl border border-ink/10 bg-white/70 p-5">
+            <div className="neo-panel rounded-3xl p-5">
               <p className="label">Progress</p>
               <div className="mt-4 flex items-center gap-6">
                 <div className="relative h-24 w-24">
                   <div
                     className="absolute inset-0 rounded-full"
                     style={{
-                      background: `conic-gradient(#e85d4a ${progress}%, #efe7df ${progress}% 100%)`,
+                      background: `conic-gradient(rgb(var(--accent)) ${progress}%, rgb(var(--haze)) ${progress}% 100%)`,
                     }}
                   />
-                  <div className="absolute inset-3 rounded-full bg-white" />
+                  <div className="absolute inset-3 rounded-full bg-mist/80" />
                   <div className="absolute inset-0 flex items-center justify-center text-sm font-semibold">
                     {entry.totalVolumes ? `${Math.round(progress)}%` : "--"}
                   </div>
@@ -531,12 +531,12 @@ export function MangaDetailPage() {
               </div>
             </div>
 
-            <div className="rounded-3xl border border-ink/10 bg-white/70 p-5">
+            <div className="neo-panel rounded-3xl p-5">
               <p className="label">MAL stats</p>
               <p className="text-sm text-ink/60">Score and popularity rank.</p>
               <div className="mt-4 grid gap-3">
                 {malLoading && (
-                  <div className="rounded-2xl border border-ink/10 bg-white/70 px-3 py-2 text-xs text-ink/60">
+                  <div className="neo-panel rounded-2xl px-3 py-2 text-xs text-ink/70">
                     Loading MAL stats...
                   </div>
                 )}
@@ -546,22 +546,22 @@ export function MangaDetailPage() {
                   </div>
                 )}
                 {!malLoading && !malError && !entry.malId && (
-                  <div className="rounded-2xl border border-ink/10 bg-white/70 px-3 py-2 text-xs text-ink/60">
+                  <div className="neo-panel rounded-2xl px-3 py-2 text-xs text-ink/70">
                     No MAL ID found for this manga.
                   </div>
                 )}
                 {!malLoading && !malError && entry.malId && (
                   <div className="grid gap-4 md:grid-cols-2">
-                    <div className="rounded-2xl border border-ink/10 bg-white/80 px-3 py-3">
-                      <p className="text-xs uppercase tracking-[0.2em] text-ink/50">
+                    <div className="neo-panel rounded-2xl px-3 py-3">
+                      <p className="text-xs uppercase tracking-[0.2em] text-ink/70">
                         Score
                       </p>
                       <p className="mt-2 text-2xl font-semibold text-ink">
                         {malStats?.score ?? "--"}
                       </p>
                     </div>
-                    <div className="rounded-2xl border border-ink/10 bg-white/80 px-3 py-3">
-                      <p className="text-xs uppercase tracking-[0.2em] text-ink/50">
+                    <div className="neo-panel rounded-2xl px-3 py-3">
+                      <p className="text-xs uppercase tracking-[0.2em] text-ink/70">
                         Pop.
                       </p>
                       <p className="mt-2 text-2xl font-semibold text-ink">
@@ -573,7 +573,7 @@ export function MangaDetailPage() {
               </div>
             </div>
 
-            <div className="rounded-3xl border border-ink/10 bg-white/70 p-5">
+            <div className="neo-panel rounded-3xl p-5">
               <p className="label">Update</p>
               <div className="mt-4 grid gap-3">
                 <input
@@ -590,7 +590,7 @@ export function MangaDetailPage() {
                   Save owned volumes
                 </button>
                 <select
-                  className="input-field"
+                  className="neo-select rounded-2xl px-3 py-3 text-sm"
                   value={entry.status}
                   onChange={(event) => updateStatus(entry.id, event.target.value as any)}
                 >
@@ -608,7 +608,7 @@ export function MangaDetailPage() {
               </div>
             </div>
 
-            <div className="rounded-3xl border border-ink/10 bg-white/70 p-5">
+            <div className="neo-panel rounded-3xl p-5">
               <p className="label">Upcoming</p>
               <p className="text-sm text-ink/60">
                 Add an announced volume and its release date.
@@ -647,7 +647,7 @@ export function MangaDetailPage() {
                   </div>
                 )}
                 {upcomingNotice && (
-                  <div className="rounded-2xl border border-ink/10 bg-white/70 px-3 py-2 text-xs text-ink/70">
+                  <div className="neo-panel rounded-2xl px-3 py-2 text-xs text-ink/70">
                     {upcomingNotice}
                   </div>
                 )}
@@ -665,7 +665,7 @@ export function MangaDetailPage() {
               to find nearby bookstores.
             </p>
 
-          <div className="mt-6 grid gap-3 rounded-3xl border border-dashed border-ink/20 bg-white/70 p-5">
+          <div className="neo-panel mt-6 grid gap-3 rounded-3xl border-dashed p-5">
             <div className="flex items-center justify-between text-sm">
               <span className="text-ink/60">API status</span>
               <span className="chip">
@@ -701,7 +701,7 @@ export function MangaDetailPage() {
                 {places.slice(0, 5).map((place) => (
                   <div
                     key={place.id}
-                    className="rounded-2xl border border-ink/10 bg-white/80 p-4"
+                    className="neo-panel rounded-2xl p-4"
                   >
                     <p className="font-semibold text-ink">{place.name}</p>
                     {place.address && (
@@ -727,7 +727,7 @@ export function MangaDetailPage() {
               </div>
             )}
             {placesStatus === "ready" && places.length === 0 && (
-              <div className="rounded-2xl border border-ink/10 bg-white/70 p-4 text-sm text-ink/60">
+              <div className="neo-panel rounded-2xl p-4 text-sm text-ink/70">
                 No nearby bookstores were returned.
               </div>
             )}
@@ -751,7 +751,7 @@ export function MangaDetailPage() {
 
             <div className="mt-6 space-y-3">
               {releasesLoading && (
-                <div className="rounded-2xl border border-ink/10 bg-white/70 p-4 text-sm text-ink/60">
+                <div className="neo-panel rounded-2xl p-4 text-sm text-ink/70">
                   Loading release history...
                 </div>
               )}
@@ -761,14 +761,14 @@ export function MangaDetailPage() {
                 </div>
               )}
               {!releasesLoading && !releasesError && releaseRows.length === 0 && (
-                <div className="rounded-2xl border border-ink/10 bg-white/70 p-4 text-sm text-ink/60">
+                <div className="neo-panel rounded-2xl p-4 text-sm text-ink/70">
                   No releases found yet. The next scan should populate this.
                 </div>
               )}
               {releaseRows.map((item) => (
                 <div
                   key={item.id}
-                  className="flex items-center justify-between rounded-2xl border border-ink/10 bg-white/80 p-4"
+                  className="neo-panel flex items-center justify-between rounded-2xl p-4"
                 >
                   <div>
                     <p className="font-semibold text-ink">Vol. {item.volume}</p>
@@ -827,7 +827,7 @@ export function MangaDetailPage() {
             </div>
           )}
           {volumeMax === 0 && (
-            <div className="rounded-2xl border border-ink/10 bg-white/70 p-4 text-sm text-ink/60">
+            <div className="neo-panel rounded-2xl p-4 text-sm text-ink/70">
               Total volumes unknown. Add a total via search or use the upcoming release
               section to build the list.
             </div>
@@ -842,8 +842,8 @@ export function MangaDetailPage() {
                     onClick={() => toggleVolume(volume)}
                     className={`min-w-[44px] rounded-full border px-3 py-2 text-sm font-semibold transition ${
                       owned
-                        ? "border-ink bg-ink text-white"
-                        : "border-ink/15 bg-white/70 text-ink/70 hover:border-ink/40"
+                        ? "border-accent bg-accent text-white shadow-[0_10px_20px_-16px_rgba(255,61,139,0.8)]"
+                        : "neo-select text-ink/80 hover:border-accent/60"
                     }`}
                   >
                     {volume}
