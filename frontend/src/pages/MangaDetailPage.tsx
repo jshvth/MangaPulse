@@ -50,6 +50,9 @@ export function MangaDetailPage() {
     "idle"
   );
   const [placesError, setPlacesError] = useState<string | null>(null);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(
+    null
+  );
   const amazonDomain = (import.meta as any).env?.VITE_AMAZON_DOMAIN as string | undefined;
   const OVERPASS_ENDPOINT = "https://overpass-api.de/api/interpreter";
 
@@ -364,6 +367,7 @@ export function MangaDetailPage() {
 
       const lat = position.coords.latitude;
       const lon = position.coords.longitude;
+      setUserLocation({ lat, lon });
       const radius = 30000;
       const query = `
         [out:json][timeout:25];
@@ -639,9 +643,13 @@ export function MangaDetailPage() {
             </button>
             <a
               className="btn-primary"
-              href={`https://www.openstreetmap.org/search?query=${encodeURIComponent(
-                "bookstore near me"
-              )}`}
+              href={
+                userLocation
+                  ? `https://www.openstreetmap.org/#map=13/${userLocation.lat}/${userLocation.lon}`
+                  : `https://www.openstreetmap.org/search?query=${encodeURIComponent(
+                      "bookstore near me"
+                    )}`
+              }
                 target="_blank"
                 rel="noreferrer"
             >
@@ -656,7 +664,7 @@ export function MangaDetailPage() {
             )}
             {placesStatus === "ready" && places.length > 0 && (
               <div className="grid gap-3">
-                {places.slice(0, 6).map((place) => (
+                {places.slice(0, 5).map((place) => (
                   <div
                     key={place.id}
                     className="rounded-2xl border border-ink/10 bg-white/80 p-4"
