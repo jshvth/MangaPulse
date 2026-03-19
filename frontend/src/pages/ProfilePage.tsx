@@ -3,6 +3,9 @@ import { useAuth } from "../context/AuthContext";
 import { supabase } from "../lib/supabaseClient";
 
 type ProfileState = {
+  display_name: string;
+  location_city: string;
+  location_country: string;
   bio: string;
   avatar_url: string;
   favorite_1: string;
@@ -11,6 +14,9 @@ type ProfileState = {
 };
 
 const emptyProfile: ProfileState = {
+  display_name: "",
+  location_city: "",
+  location_country: "",
   bio: "",
   avatar_url: "",
   favorite_1: "",
@@ -35,7 +41,9 @@ export function ProfilePage() {
 
     supabase
       .from("user_profiles")
-      .select("bio, avatar_url, favorite_1, favorite_2, favorite_3")
+      .select(
+        "display_name, location_city, location_country, bio, avatar_url, favorite_1, favorite_2, favorite_3"
+      )
       .eq("user_id", user.id)
       .maybeSingle()
       .then(({ data, error }) => {
@@ -46,6 +54,9 @@ export function ProfilePage() {
         }
         if (data) {
           setProfile({
+            display_name: data.display_name ?? "",
+            location_city: data.location_city ?? "",
+            location_country: data.location_country ?? "",
             bio: data.bio ?? "",
             avatar_url: data.avatar_url ?? "",
             favorite_1: data.favorite_1 ?? "",
@@ -74,6 +85,9 @@ export function ProfilePage() {
       .from("user_profiles")
       .upsert({
         user_id: user.id,
+        display_name: profile.display_name.trim() || null,
+        location_city: profile.location_city.trim() || null,
+        location_country: profile.location_country.trim() || null,
         bio: profile.bio.trim() || null,
         avatar_url: profile.avatar_url.trim() || null,
         favorite_1: profile.favorite_1.trim() || null,
@@ -167,10 +181,10 @@ export function ProfilePage() {
 
       <section className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
         <div className="glass-card hover-lift reveal rounded-[32px] p-6 md:p-8">
-          <p className="label">Avatar</p>
-          <h3 className="font-display text-2xl">Profile image</h3>
+          <p className="label">Profile photo</p>
+          <h3 className="font-display text-2xl">Upload your picture</h3>
           <p className="text-sm text-ink/60">
-            Upload a profile image. We will save it to your account.
+            Add a clean photo so your profile feels personal.
           </p>
           <div className="mt-6 grid gap-4">
             <div className="flex items-center gap-4 rounded-3xl border border-ink/10 bg-white/70 p-4">
@@ -220,6 +234,42 @@ export function ProfilePage() {
         </div>
 
         <div className="glass-card hover-lift reveal reveal-delay-1 rounded-[32px] p-6 md:p-8">
+          <p className="label">Details</p>
+          <h3 className="font-display text-2xl">Name & location</h3>
+          <p className="text-sm text-ink/60">
+            Add your name and a simple location (city + country).
+          </p>
+          <div className="mt-6 grid gap-4">
+            <input
+              className="input-field"
+              placeholder="Display name"
+              value={profile.display_name}
+              onChange={(event) =>
+                setProfile((prev) => ({ ...prev, display_name: event.target.value }))
+              }
+            />
+            <div className="grid gap-3 md:grid-cols-2">
+              <input
+                className="input-field"
+                placeholder="City"
+                value={profile.location_city}
+                onChange={(event) =>
+                  setProfile((prev) => ({ ...prev, location_city: event.target.value }))
+                }
+              />
+              <input
+                className="input-field"
+                placeholder="Country"
+                value={profile.location_country}
+                onChange={(event) =>
+                  setProfile((prev) => ({ ...prev, location_country: event.target.value }))
+                }
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="glass-card hover-lift reveal reveal-delay-2 rounded-[32px] p-6 md:p-8">
           <p className="label">Bio</p>
           <h3 className="font-display text-2xl">About you</h3>
           <p className="text-sm text-ink/60">
@@ -239,7 +289,7 @@ export function ProfilePage() {
         </div>
       </section>
 
-      <section className="glass-card hover-lift reveal reveal-delay-2 rounded-[32px] p-6 md:p-8">
+      <section className="glass-card hover-lift reveal reveal-delay-3 rounded-[32px] p-6 md:p-8">
         <p className="label">Favorites</p>
         <h3 className="font-display text-2xl">Top 3 manga/anime</h3>
         <p className="text-sm text-ink/60">
