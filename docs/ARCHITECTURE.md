@@ -14,6 +14,7 @@ MangaPulse uses a React frontend, Supabase for auth + storage, and a scheduled E
 - Jikan API (MyAnimeList) for volumes + MAL IDs
 - AniList GraphQL for fallback volumes + metadata
 - Google Books for optional volume release dates
+- OpenStreetMap + Overpass for nearby bookstores
 
 **Release Flow**
 1. Cron triggers `release-check` every 3 days
@@ -33,6 +34,7 @@ MangaPulse uses a React frontend, Supabase for auth + storage, and a scheduled E
 - Collection page loads from `user_mangas`
 - Detail page pulls recent `manga_releases`
 - Auth handled via Supabase Auth
+- Bookstore search uses OpenStreetMap (no key)
 
 **Directories**
 - `frontend/` UI and client logic

@@ -15,6 +15,9 @@ MangaPulse is a KI-native web app for tracking manga collections and surfacing n
 - Release history and notification flags
 - Supabase Auth + Postgres persistence
 - Edge Function release scan (cron)
+- Per-volume checklist and manual upcoming releases
+- Community profiles + follow system
+- OpenStreetMap bookstores (no API key)
 
 **Feature Docs Index**
 - `docs/features/README.md`
@@ -23,6 +26,7 @@ MangaPulse is a KI-native web app for tracking manga collections and surfacing n
 - Jikan (MyAnimeList data)
 - AniList GraphQL
 - Google Books (optional release dates)
+- OpenStreetMap + Overpass (bookstores)
 
 **Tech Stack**
 - Frontend: React (Vite) + TypeScript + Tailwind
@@ -50,6 +54,14 @@ VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 3. Run the app
 ```bash
 npm run dev
+```
+
+**Test Emails (Ethereal)**
+```bash
+cd mcp-server
+export SUPABASE_URL=your_supabase_url
+export SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+npm run send:ethereal
 ```
 
 **Deploy**

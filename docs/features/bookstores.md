@@ -8,6 +8,7 @@
 - Search radius: **15km**.
 - Displays name, address (when available), and distance.
 - Includes a direct OpenStreetMap link.
+- Retry + fallback across multiple Overpass endpoints.
 
 **Key UI**
 - “Use my location” button on Manga Detail.

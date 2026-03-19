@@ -23,3 +23,4 @@
 **Next Steps**
 - Verify a domain and enable Resend in production.
 - Add “mark as read” or notification history.
+ - Expose Ethereal preview URLs in a dev-only UI panel.

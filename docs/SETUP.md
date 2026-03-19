@@ -57,3 +57,12 @@ npm install
 npm run build
 node dist/index.js
 ```
+
+**Ethereal Test Emails (optional)**
+Use this to test the email flow without a verified domain.
+```bash
+cd mcp-server
+export SUPABASE_URL=your_supabase_url
+export SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+npm run send:ethereal
+```
