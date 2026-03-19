@@ -8,8 +8,8 @@ type AuthContextValue = {
   user: User | null;
   session: Session | null;
   error: string | null;
-  signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string) => Promise<void>;
+  signIn: (email: string, password: string, remember: boolean) => Promise<void>;
+  signUp: (email: string, password: string, remember: boolean) => Promise<void>;
   signOut: () => Promise<void>;
 };
 
@@ -49,8 +49,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  const signIn = async (email: string, password: string) => {
+  const clearSupabaseLocalSessions = () => {
+    if (typeof window === "undefined") return;
+    const keysToRemove: string[] = [];
+    for (let i = 0; i < window.localStorage.length; i += 1) {
+      const key = window.localStorage.key(i);
+      if (key && key.startsWith("sb-") && key.endsWith("-auth-token")) {
+        keysToRemove.push(key);
+      }
+    }
+    keysToRemove.forEach((key) => window.localStorage.removeItem(key));
+  };
+
+  const signIn = async (email: string, password: string, remember: boolean) => {
     setError(null);
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem("mp_remember", remember ? "1" : "0");
+      if (!remember) {
+        clearSupabaseLocalSessions();
+      }
+    }
     const { error: authError } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -60,8 +78,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const signUp = async (email: string, password: string) => {
+  const signUp = async (email: string, password: string, remember: boolean) => {
     setError(null);
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem("mp_remember", remember ? "1" : "0");
+      if (!remember) {
+        clearSupabaseLocalSessions();
+      }
+    }
     const { error: authError } = await supabase.auth.signUp({
       email,
       password,

@@ -8,17 +8,21 @@ export function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [notice, setNotice] = useState<string | null>(null);
+  const [remember, setRemember] = useState(() => {
+    if (typeof window === "undefined") return true;
+    return window.localStorage.getItem("mp_remember") !== "0";
+  });
 
   const handleSignIn = async () => {
     setNotice(null);
-    await signIn(email, password);
+    await signIn(email, password, remember);
   };
 
   const handleSignUp = async () => {
     setNotice(
       "Account created. If email confirmation is enabled, check your inbox."
     );
-    await signUp(email, password);
+    await signUp(email, password, remember);
   };
 
   useEffect(() => {
@@ -84,6 +88,15 @@ export function AuthPage() {
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
               />
+            </label>
+            <label className="flex items-center gap-2 text-sm text-ink/70">
+              <input
+                type="checkbox"
+                className="h-4 w-4 accent-accent"
+                checked={remember}
+                onChange={(event) => setRemember(event.target.checked)}
+              />
+              Remember me on this device
             </label>
           </div>
           {error && (
