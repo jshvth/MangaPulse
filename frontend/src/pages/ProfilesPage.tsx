@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import type { MouseEvent } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "../lib/supabaseClient";
 import { useAuth } from "../context/AuthContext";
@@ -23,6 +24,7 @@ export function ProfilesPage() {
   const [results, setResults] = useState<ProfileResult[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [followingIds, setFollowingIds] = useState<string[]>([]);
+  const [followBusyId, setFollowBusyId] = useState<string | null>(null);
 
   const favorites = (profile: ProfileResult) =>
     [profile.favorite_1, profile.favorite_2, profile.favorite_3].filter(Boolean) as string[];
@@ -87,6 +89,51 @@ export function ProfilesPage() {
     setLoading(false);
   };
 
+  const handleToggleFollow = async (
+    event: MouseEvent<HTMLButtonElement>,
+    targetId: string
+  ) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (!user) {
+      setError("Sign in to follow profiles.");
+      return;
+    }
+
+    if (followBusyId) return;
+    setFollowBusyId(targetId);
+    setError(null);
+
+    const isFollowing = followingIds.includes(targetId);
+
+    if (isFollowing) {
+      const { error } = await supabase
+        .from("user_follows")
+        .delete()
+        .eq("follower_id", user.id)
+        .eq("following_id", targetId);
+
+      if (!error) {
+        setFollowingIds((prev) => prev.filter((id) => id !== targetId));
+      } else {
+        setError(error.message);
+      }
+    } else {
+      const { error } = await supabase
+        .from("user_follows")
+        .insert({ follower_id: user.id, following_id: targetId });
+
+      if (!error) {
+        setFollowingIds((prev) => [...prev, targetId]);
+      } else {
+        setError(error.message);
+      }
+    }
+
+    setFollowBusyId(null);
+  };
+
   return (
     <div className="space-y-8">
       <section className="reveal flex flex-wrap items-end justify-between gap-4">
@@ -140,33 +187,48 @@ export function ProfilesPage() {
               to={`/profiles/${profile.user_id}`}
               className="glass-card hover-lift rounded-3xl p-5"
             >
-              <div className="flex items-center gap-4">
-                <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border border-ink/10 bg-white">
-                  {profile.avatar_url ? (
-                    <img
-                      src={profile.avatar_url}
-                      alt={profile.display_name ?? "Profile"}
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <span className="text-xs text-ink/40">No image</span>
-                  )}
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border border-ink/10 bg-white">
+                    {profile.avatar_url ? (
+                      <img
+                        src={profile.avatar_url}
+                        alt={profile.display_name ?? "Profile"}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-xs text-ink/40">No image</span>
+                    )}
+                  </div>
+                  <div>
+                    <p className="font-semibold text-ink">
+                      {profile.display_name ?? "Unnamed"}
+                    </p>
+                    <p className="text-xs text-ink/50">
+                      {profile.location_city
+                        ? `${profile.location_city}${profile.location_country ? `, ${profile.location_country}` : ""}`
+                        : "Location hidden"}
+                    </p>
+                    {followingIds.includes(profile.user_id) && (
+                      <span className="mt-2 inline-flex rounded-full bg-ink/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-ink/60">
+                        Following
+                      </span>
+                    )}
+                  </div>
                 </div>
-                <div>
-                  <p className="font-semibold text-ink">
-                    {profile.display_name ?? "Unnamed"}
-                  </p>
-                  <p className="text-xs text-ink/50">
-                    {profile.location_city
-                      ? `${profile.location_city}${profile.location_country ? `, ${profile.location_country}` : ""}`
-                      : "Location hidden"}
-                  </p>
-                  {followingIds.includes(profile.user_id) && (
-                    <span className="mt-2 inline-flex rounded-full bg-ink/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-ink/60">
-                      Following
-                    </span>
-                  )}
-                </div>
+                {user?.id !== profile.user_id && (
+                  <button
+                    className="btn-ghost text-xs uppercase tracking-[0.2em]"
+                    onClick={(event) => handleToggleFollow(event, profile.user_id)}
+                    disabled={followBusyId === profile.user_id}
+                  >
+                    {followBusyId === profile.user_id
+                      ? "..."
+                      : followingIds.includes(profile.user_id)
+                        ? "Unfollow"
+                        : "Follow"}
+                  </button>
+                )}
               </div>
               {profile.bio && (
                 <p className="mt-4 text-sm text-ink/60 line-clamp-3">{profile.bio}</p>
