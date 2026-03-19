@@ -626,7 +626,7 @@ export function MangaDetailPage() {
                   placeholder="Volume #"
                 />
                 <input
-                  className="input-field"
+                  className="input-field date-field"
                   type="date"
                   value={upcomingDate}
                   onChange={(event) => {
