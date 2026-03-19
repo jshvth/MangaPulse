@@ -1,19 +1,21 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
-export function AuthPage() {
-  const { signIn, error, isAuthed } = useAuth();
+export function SignUpPage() {
+  const { signUp, error, isAuthed } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [notice, setNotice] = useState<string | null>(null);
   const [remember, setRemember] = useState(() => {
     if (typeof window === "undefined") return true;
     return window.localStorage.getItem("mp_remember") !== "0";
   });
 
-  const handleSignIn = async () => {
-    await signIn(email, password, remember);
+  const handleSignUp = async () => {
+    setNotice("Account created. If email confirmation is enabled, check your inbox.");
+    await signUp(email, password, remember);
   };
 
   useEffect(() => {
@@ -29,11 +31,11 @@ export function AuthPage() {
           <div className="space-y-6">
             <p className="label text-white/70">MANGAPULSE</p>
             <h1 className="font-display text-4xl leading-tight md:text-5xl">
-              A calm, precise space for your manga collection.
+              Build your manga universe in one place.
             </h1>
             <p className="text-white/80">
-              Track volumes, see what is missing, and get alerted when a new
-              release drops. Designed like a boutique library.
+              Create your account to track volumes, follow new releases, and
+              keep your shelf perfectly organized.
             </p>
           </div>
           <div className="grid gap-4 rounded-3xl border border-white/15 bg-white/10 p-6">
@@ -55,9 +57,9 @@ export function AuthPage() {
         <div className="space-y-8">
           <div>
             <p className="label">Account</p>
-            <h2 className="font-display text-3xl">Sign in</h2>
+            <h2 className="font-display text-3xl">Create account</h2>
             <p className="text-sm text-ink/60">
-              Use your MangaPulse account to sync your collection.
+              Use a valid email so we can confirm your account.
             </p>
           </div>
           <div className="space-y-4">
@@ -95,16 +97,18 @@ export function AuthPage() {
               {error}
             </div>
           )}
+          {notice && (
+            <div className="neo-panel rounded-2xl px-4 py-3 text-sm text-ink/70">
+              {notice}
+            </div>
+          )}
           <div className="flex flex-col gap-3">
-            <button className="btn-primary" onClick={handleSignIn}>
-              Sign in
-            </button>
-            <Link to="/signup" className="btn-ghost text-center">
+            <button className="btn-primary" onClick={handleSignUp}>
               Create account
+            </button>
+            <Link to="/" className="btn-ghost text-center">
+              Already have an account? Sign in
             </Link>
-          </div>
-          <div className="neo-panel rounded-2xl border-dashed p-4 text-sm text-ink/80">
-            New here? Create an account to unlock your collection.
           </div>
         </div>
       </section>

@@ -50,6 +50,7 @@ npm install
 ```bash
 VITE_SUPABASE_URL=your_supabase_url
 VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+VITE_SITE_URL=http://localhost:5173
 ```
 3. Run the app
 ```bash

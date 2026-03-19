@@ -86,9 +86,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         clearSupabaseLocalSessions();
       }
     }
+    const siteUrl =
+      typeof window !== "undefined"
+        ? ((import.meta as any).env?.VITE_SITE_URL as string | undefined) ??
+          window.location.origin
+        : ((import.meta as any).env?.VITE_SITE_URL as string | undefined);
+    const emailRedirectTo = siteUrl ? `${siteUrl}/collection` : undefined;
     const { error: authError } = await supabase.auth.signUp({
       email,
       password,
+      options: emailRedirectTo ? { emailRedirectTo } : undefined,
     });
     if (authError) {
       setError(authError.message);

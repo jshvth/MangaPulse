@@ -15,6 +15,7 @@ This project is designed for Vercel (frontend) + Supabase (backend).
 - `VITE_SUPABASE_URL`
 - `VITE_SUPABASE_ANON_KEY`
 - No API key required for the OpenStreetMap bookstore search
+- `VITE_SITE_URL` (your Vercel URL, used for auth email redirects)
 
 After setting variables, trigger a new deploy.
 
@@ -24,6 +25,7 @@ After setting variables, trigger a new deploy.
 - Cron schedule SQL in `supabase/cron/release_check.sql`
 - Data sources: Jikan + AniList
 - Optional: `GOOGLE_BOOKS_API_KEY` (release date lookup)
+ - Auth: add your Vercel URL to **Redirect URLs** in Supabase Auth settings
 
 **Notes**
 - The frontend expects Supabase auth to be enabled.
