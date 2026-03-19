@@ -67,3 +67,6 @@ npm run send:ethereal
 
 **Deploy**
 See `docs/DEPLOYMENT.md` for Vercel + Supabase settings.
+
+**Hosting**
+- Vercel (frontend)
