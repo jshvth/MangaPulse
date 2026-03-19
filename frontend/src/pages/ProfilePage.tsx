@@ -181,12 +181,20 @@ export function ProfilePage() {
 
       <section className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
         <div className="glass-card hover-lift reveal rounded-[32px] p-6 md:p-8">
-          <p className="label">Profile photo</p>
-          <h3 className="font-display text-2xl">Upload your picture</h3>
+          <p className="label">Profile</p>
+          <h3 className="font-display text-2xl">Identity</h3>
           <p className="text-sm text-ink/60">
-            Add a clean photo so your profile feels personal.
+            Add your name and a photo to personalize your profile.
           </p>
           <div className="mt-6 grid gap-4">
+            <input
+              className="input-field"
+              placeholder="Display name"
+              value={profile.display_name}
+              onChange={(event) =>
+                setProfile((prev) => ({ ...prev, display_name: event.target.value }))
+              }
+            />
             <div className="flex items-center gap-4 rounded-3xl border border-ink/10 bg-white/70 p-4">
               <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border border-ink/10 bg-white">
                 {profile.avatar_url ? (
@@ -234,20 +242,12 @@ export function ProfilePage() {
         </div>
 
         <div className="glass-card hover-lift reveal reveal-delay-1 rounded-[32px] p-6 md:p-8">
-          <p className="label">Details</p>
-          <h3 className="font-display text-2xl">Name & location</h3>
+          <p className="label">About</p>
+          <h3 className="font-display text-2xl">About you</h3>
           <p className="text-sm text-ink/60">
-            Add your name and a simple location (city + country).
+            Tell your collection story in a few lines.
           </p>
           <div className="mt-6 grid gap-4">
-            <input
-              className="input-field"
-              placeholder="Display name"
-              value={profile.display_name}
-              onChange={(event) =>
-                setProfile((prev) => ({ ...prev, display_name: event.target.value }))
-              }
-            />
             <div className="grid gap-3 md:grid-cols-2">
               <input
                 className="input-field"
@@ -266,16 +266,6 @@ export function ProfilePage() {
                 }
               />
             </div>
-          </div>
-        </div>
-
-        <div className="glass-card hover-lift reveal reveal-delay-2 rounded-[32px] p-6 md:p-8">
-          <p className="label">Bio</p>
-          <h3 className="font-display text-2xl">About you</h3>
-          <p className="text-sm text-ink/60">
-            Tell your collection story in a few lines.
-          </p>
-          <div className="mt-6 grid gap-4">
             <textarea
               className="input-field min-h-[140px]"
               placeholder="Collector of shonen classics and cozy fantasy..."
