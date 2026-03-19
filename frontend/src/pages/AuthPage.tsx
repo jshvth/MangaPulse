@@ -29,26 +29,28 @@ export function AuthPage() {
 
   return (
     <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr]">
-      <section className="reveal hover-lift rounded-[32px] bg-ink p-10 text-white shadow-[0_30px_70px_-40px_rgba(16,24,38,0.6)]">
+      <section className="reveal hover-lift rounded-[32px] bg-mist p-10 text-white shadow-[0_30px_70px_-40px_rgba(0,0,0,0.7)]">
         <div className="flex h-full flex-col justify-between gap-10">
           <div className="space-y-6">
-            <p className="label text-white/60">MANGAPULSE</p>
+            <p className="label text-white/70">MANGAPULSE</p>
             <h1 className="font-display text-4xl leading-tight md:text-5xl">
               A calm, precise space for your manga collection.
             </h1>
-            <p className="text-white/70">
+            <p className="text-white/80">
               Track volumes, see what is missing, and get alerted when a new
               release drops. Designed like a boutique library.
             </p>
           </div>
-          <div className="grid gap-4 rounded-3xl bg-white/10 p-6">
+          <div className="grid gap-4 rounded-3xl border border-white/15 bg-white/10 p-6">
             <div className="flex items-center justify-between">
-              <p className="text-sm text-white/70">Live pulse</p>
-              <span className="chip border-white/40 bg-white/10 text-white/80">Next check in 3 days</span>
+              <p className="text-sm text-white/80">Live pulse</p>
+              <span className="chip border-white/40 bg-white/10 text-white/90">
+                Next check in 3 days
+              </span>
             </div>
             <div className="flex items-center gap-3">
               <div className="h-2 w-2 rounded-full bg-accent" />
-              <p className="text-xs text-white/70">Release checks + alerts ready</p>
+              <p className="text-xs text-white/80">Release checks + alerts ready</p>
             </div>
           </div>
         </div>
@@ -102,7 +104,7 @@ export function AuthPage() {
               Create account
             </button>
           </div>
-          <div className="rounded-2xl border border-dashed border-ink/20 bg-white/60 p-4 text-sm text-ink/60">
+          <div className="neo-panel rounded-2xl border-dashed p-4 text-sm text-ink/80">
             New here? Create an account to unlock your collection.
           </div>
         </div>
