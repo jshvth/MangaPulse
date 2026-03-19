@@ -35,6 +35,9 @@ export function MangaDetailPage() {
   const [upcomingSaving, setUpcomingSaving] = useState(false);
   const [upcomingNotice, setUpcomingNotice] = useState<string | null>(null);
   const [upcomingError, setUpcomingError] = useState<string | null>(null);
+  const [ownedSet, setOwnedSet] = useState<Set<number>>(new Set());
+  const [volumeLoading, setVolumeLoading] = useState(false);
+  const [volumeError, setVolumeError] = useState<string | null>(null);
   const [malStats, setMalStats] = useState<{
     score: number | null;
     popularity: number | null;
@@ -54,6 +57,14 @@ export function MangaDetailPage() {
     if (!entry.totalVolumes) return 0;
     return Math.min((entry.ownedVolumes / entry.totalVolumes) * 100, 100);
   }, [entry]);
+
+  const volumeMax = useMemo(() => {
+    if (!entry) return 0;
+    const releaseMax = releases.length
+      ? Math.max(...releases.map((item) => item.volume ?? 0))
+      : 0;
+    return Math.max(entry.totalVolumes ?? 0, entry.ownedVolumes ?? 0, releaseMax);
+  }, [entry?.totalVolumes, entry?.ownedVolumes, releases]);
 
   const fetchReleases = async (mangaId: string) => {
     const { data, error } = await supabase
@@ -98,6 +109,35 @@ export function MangaDetailPage() {
       setUpcomingVolume(String(suggested));
     }
   }, [entry?.id, upcomingVolume]);
+
+  useEffect(() => {
+    if (!entry) return;
+    let alive = true;
+    setVolumeLoading(true);
+    setVolumeError(null);
+
+    supabase
+      .from("user_manga_volumes")
+      .select("volume")
+      .eq("user_manga_id", entry.id)
+      .then(({ data, error }) => {
+        if (!alive) return;
+        if (error) {
+          setVolumeError(error.message);
+          setOwnedSet(new Set());
+        } else {
+          setOwnedSet(new Set((data ?? []).map((row) => row.volume)));
+        }
+      })
+      .then(() => {
+        if (!alive) return;
+        setVolumeLoading(false);
+      });
+
+    return () => {
+      alive = false;
+    };
+  }, [entry?.id]);
 
   useEffect(() => {
     if (!entry?.malId) {
@@ -213,6 +253,67 @@ export function MangaDetailPage() {
 
     setUpcomingNotice("Upcoming release saved.");
     setUpcomingSaving(false);
+  };
+
+  const syncOwnedCount = async (nextSet: Set<number>) => {
+    setOwnedSet(nextSet);
+    await updateOwned(entry.id, nextSet.size);
+  };
+
+  const toggleVolume = async (volume: number) => {
+    if (!entry) return;
+    const next = new Set(ownedSet);
+    if (next.has(volume)) {
+      const { error } = await supabase
+        .from("user_manga_volumes")
+        .delete()
+        .eq("user_manga_id", entry.id)
+        .eq("volume", volume);
+      if (!error) {
+        next.delete(volume);
+        await syncOwnedCount(next);
+      }
+      return;
+    }
+
+    const { error } = await supabase
+      .from("user_manga_volumes")
+      .upsert({ user_manga_id: entry.id, volume }, { onConflict: "user_manga_id,volume" });
+    if (!error) {
+      next.add(volume);
+      await syncOwnedCount(next);
+    }
+  };
+
+  const markAllOwned = async () => {
+    if (!entry || volumeMax === 0) return;
+    setVolumeLoading(true);
+    const volumes = Array.from({ length: volumeMax }, (_, idx) => idx + 1);
+    const payload = volumes.map((volume) => ({ user_manga_id: entry.id, volume }));
+    const { error } = await supabase
+      .from("user_manga_volumes")
+      .upsert(payload, { onConflict: "user_manga_id,volume" });
+    if (error) {
+      setVolumeError(error.message);
+    } else {
+      await syncOwnedCount(new Set(volumes));
+    }
+    setVolumeLoading(false);
+  };
+
+  const clearOwned = async () => {
+    if (!entry) return;
+    setVolumeLoading(true);
+    const { error } = await supabase
+      .from("user_manga_volumes")
+      .delete()
+      .eq("user_manga_id", entry.id);
+    if (error) {
+      setVolumeError(error.message);
+    } else {
+      await syncOwnedCount(new Set());
+    }
+    setVolumeLoading(false);
   };
 
   const loadGooglePlaces = () =>
@@ -627,6 +728,63 @@ export function MangaDetailPage() {
               ))}
             </div>
           </div>
+        </div>
+      </section>
+
+      <section className="glass-card hover-lift reveal rounded-[32px] p-6 md:p-8">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="label">Volume checklist</p>
+            <h3 className="font-display text-2xl">Mark owned volumes</h3>
+            <p className="text-sm text-ink/60">
+              Track non-sequential volumes (e.g., 1-4 + 8-10).
+            </p>
+          </div>
+          <div className="flex items-center gap-3 text-sm text-ink/60">
+            <span>
+              Owned: {ownedSet.size}/{volumeMax || "?"}
+            </span>
+            <button className="btn-ghost" onClick={clearOwned} disabled={volumeLoading}>
+              Clear
+            </button>
+            <button className="btn-primary" onClick={markAllOwned} disabled={volumeLoading}>
+              Mark all
+            </button>
+          </div>
+        </div>
+
+        <div className="mt-6 space-y-4">
+          {volumeError && (
+            <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+              {volumeError}
+            </div>
+          )}
+          {volumeMax === 0 && (
+            <div className="rounded-2xl border border-ink/10 bg-white/70 p-4 text-sm text-ink/60">
+              Total volumes unknown. Add a total via search or use the upcoming release
+              section to build the list.
+            </div>
+          )}
+          {volumeMax > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {Array.from({ length: volumeMax }, (_, idx) => idx + 1).map((volume) => {
+                const owned = ownedSet.has(volume);
+                return (
+                  <button
+                    key={volume}
+                    onClick={() => toggleVolume(volume)}
+                    className={`min-w-[44px] rounded-full border px-3 py-2 text-sm font-semibold transition ${
+                      owned
+                        ? "border-ink bg-ink text-white"
+                        : "border-ink/15 bg-white/70 text-ink/70 hover:border-ink/40"
+                    }`}
+                  >
+                    {volume}
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
     </div>
