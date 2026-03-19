@@ -33,6 +33,21 @@ export function TopNav() {
         >
           Collection
         </NavLink>
+        <NavLink
+          to={isAuthed ? "/profile" : "/"}
+          onClick={(event) => {
+            if (!isAuthed) event.preventDefault();
+          }}
+          className={({ isActive }) =>
+            isAuthed
+              ? isActive
+                ? "text-ink"
+                : "hover:text-ink"
+              : "cursor-not-allowed text-ink/40"
+          }
+        >
+          Profile
+        </NavLink>
         {isAuthed ? (
           <div className="flex items-center gap-4">
             <NotificationBell />

@@ -4,6 +4,7 @@ import { TopNav } from "./components/TopNav";
 import { AuthPage } from "./pages/AuthPage";
 import { CollectionPage } from "./pages/CollectionPage";
 import { MangaDetailPage } from "./pages/MangaDetailPage";
+import { ProfilePage } from "./pages/ProfilePage";
 import { AuthGate } from "./components/AuthGate";
 
 function App() {
@@ -27,6 +28,14 @@ function App() {
             element={
               <AuthGate>
                 <MangaDetailPage />
+              </AuthGate>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <AuthGate>
+                <ProfilePage />
               </AuthGate>
             }
           />
