@@ -25,6 +25,7 @@ export function ProfilePage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -88,6 +89,67 @@ export function ProfilePage() {
     setSaving(false);
   };
 
+  const handleUploadAvatar = async (file: File) => {
+    if (!user) return;
+    setUploading(true);
+    setError(null);
+    setNotice(null);
+
+    const fileExt = file.name.split(".").pop() ?? "png";
+    const filePath = `${user.id}/avatar.${fileExt}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("avatars")
+      .upload(filePath, file, { upsert: true });
+
+    if (uploadError) {
+      setError(uploadError.message);
+      setUploading(false);
+      return;
+    }
+
+    const { data } = supabase.storage.from("avatars").getPublicUrl(filePath);
+    const avatar_url = data?.publicUrl ?? "";
+
+    const { error: updateError } = await supabase
+      .from("user_profiles")
+      .upsert({ user_id: user.id, avatar_url });
+
+    if (updateError) {
+      setError(updateError.message);
+    } else {
+      setProfile((prev) => ({ ...prev, avatar_url }));
+      setNotice("Profile image updated.");
+    }
+    setUploading(false);
+  };
+
+  const handleRemoveAvatar = async () => {
+    if (!user) return;
+    setUploading(true);
+    setError(null);
+    setNotice(null);
+
+    const filename = profile.avatar_url
+      ? profile.avatar_url.split("/").slice(-1)[0]
+      : "avatar.png";
+    const filePath = `${user.id}/${filename}`;
+
+    await supabase.storage.from("avatars").remove([filePath]);
+
+    const { error: updateError } = await supabase
+      .from("user_profiles")
+      .upsert({ user_id: user.id, avatar_url: null });
+
+    if (updateError) {
+      setError(updateError.message);
+    } else {
+      setProfile((prev) => ({ ...prev, avatar_url: "" }));
+      setNotice("Profile image removed.");
+    }
+    setUploading(false);
+  };
+
   return (
     <div className="space-y-8">
       <section className="reveal flex flex-wrap items-end justify-between gap-4">
@@ -108,29 +170,51 @@ export function ProfilePage() {
           <p className="label">Avatar</p>
           <h3 className="font-display text-2xl">Profile image</h3>
           <p className="text-sm text-ink/60">
-            Paste a public image URL to use as your avatar.
+            Upload a profile image. We will save it to your account.
           </p>
           <div className="mt-6 grid gap-4">
-            <input
-              className="input-field"
-              placeholder="https://image-url.com/avatar.jpg"
-              value={profile.avatar_url}
-              onChange={(event) =>
-                setProfile((prev) => ({ ...prev, avatar_url: event.target.value }))
-              }
-            />
             <div className="flex items-center gap-4 rounded-3xl border border-ink/10 bg-white/70 p-4">
-              <img
-                src={profile.avatar_url || "/placeholder-cover.svg"}
-                alt="Profile preview"
-                className="h-20 w-20 rounded-2xl object-cover"
-              />
+              <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border border-ink/10 bg-white">
+                {profile.avatar_url ? (
+                  <img
+                    src={profile.avatar_url}
+                    alt="Profile preview"
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <span className="text-xs text-ink/40">No image</span>
+                )}
+              </div>
               <div>
                 <p className="text-sm font-semibold text-ink">
                   {user?.email ?? "Your avatar"}
                 </p>
                 <p className="text-xs text-ink/50">Preview</p>
               </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <label className="btn-primary cursor-pointer">
+                {uploading ? "Uploading..." : "Upload picture"}
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(event) => {
+                    const file = event.target.files?.[0];
+                    if (file) handleUploadAvatar(file);
+                  }}
+                  disabled={uploading}
+                />
+              </label>
+              {profile.avatar_url && (
+                <button
+                  className="btn-ghost"
+                  onClick={handleRemoveAvatar}
+                  disabled={uploading}
+                >
+                  Remove
+                </button>
+              )}
             </div>
           </div>
         </div>
