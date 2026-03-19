@@ -3,15 +3,15 @@
 
 :root {
   color-scheme: light;
-  --canvas: #f2f5f7;
+  --canvas: #f8f4ee;
   --ink: #101826;
-  --accent: #ff6b4a;
-  --accent-soft: #ffd6c4;
-  --teal: #2f7f7a;
-  --moss: #8aa07a;
-  --haze: #e8eef2;
-  --mist: #f7fafb;
-  --card: rgba(255, 255, 255, 0.75);
+  --accent: #ff4d4d;
+  --accent-soft: #ffe2d9;
+  --teal: #2fb7c5;
+  --moss: #f5c04e;
+  --haze: #ebe2d8;
+  --mist: #fbfaf7;
+  --card: rgba(255, 255, 255, 0.78);
 }
 
 body {
@@ -139,10 +139,10 @@ body::before {
   position: fixed;
   inset: 0;
   background:
-    radial-gradient(circle at 10% 20%, rgba(255, 107, 74, 0.16), transparent 42%),
-    radial-gradient(circle at 85% 12%, rgba(47, 127, 122, 0.18), transparent 45%),
-    radial-gradient(circle at 50% 85%, rgba(138, 160, 122, 0.18), transparent 45%),
-    linear-gradient(120deg, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0));
+    radial-gradient(circle at 12% 18%, rgba(255, 77, 77, 0.18), transparent 40%),
+    radial-gradient(circle at 84% 14%, rgba(47, 183, 197, 0.18), transparent 42%),
+    radial-gradient(circle at 62% 86%, rgba(245, 192, 78, 0.16), transparent 46%),
+    linear-gradient(115deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0));
   pointer-events: none;
   z-index: -2;
 }
@@ -151,9 +151,11 @@ body::after {
   content: '';
   position: fixed;
   inset: 0;
-  background-image: radial-gradient(rgba(16, 24, 38, 0.05) 1px, transparent 1px);
-  background-size: 110px 110px;
-  opacity: 0.3;
+  background-image:
+    radial-gradient(rgba(16, 24, 38, 0.08) 1px, transparent 1px),
+    repeating-linear-gradient(135deg, rgba(16, 24, 38, 0.04) 0 1px, transparent 1px 10px);
+  background-size: 120px 120px, 12px 12px;
+  opacity: 0.22;
   pointer-events: none;
   z-index: -1;
 }
