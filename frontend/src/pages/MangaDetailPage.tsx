@@ -398,7 +398,7 @@ export function MangaDetailPage() {
                 )}
                 {!malLoading && !malError && entry.malId && (
                   <div className="grid gap-4 md:grid-cols-2">
-                    <div className="min-w-[150px] rounded-2xl border border-ink/10 bg-white/80 px-3 py-3">
+                    <div className="rounded-2xl border border-ink/10 bg-white/80 px-3 py-3">
                       <p className="text-xs uppercase tracking-[0.2em] text-ink/50">
                         Score
                       </p>
@@ -406,9 +406,9 @@ export function MangaDetailPage() {
                         {malStats?.score ?? "--"}
                       </p>
                     </div>
-                    <div className="min-w-[150px] rounded-2xl border border-ink/10 bg-white/80 px-3 py-3">
+                    <div className="rounded-2xl border border-ink/10 bg-white/80 px-3 py-3">
                       <p className="text-xs uppercase tracking-[0.2em] text-ink/50">
-                        Popularity
+                        Pop.
                       </p>
                       <p className="mt-2 text-2xl font-semibold text-ink">
                         {malStats?.popularity ? `#${malStats.popularity}` : "--"}
