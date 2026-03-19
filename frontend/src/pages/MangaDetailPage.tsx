@@ -378,6 +378,48 @@ export function MangaDetailPage() {
             </div>
 
             <div className="rounded-3xl border border-ink/10 bg-white/70 p-5">
+              <p className="label">MAL stats</p>
+              <p className="text-sm text-ink/60">Score and popularity rank.</p>
+              <div className="mt-4 grid gap-3">
+                {malLoading && (
+                  <div className="rounded-2xl border border-ink/10 bg-white/70 px-3 py-2 text-xs text-ink/60">
+                    Loading MAL stats...
+                  </div>
+                )}
+                {malError && (
+                  <div className="rounded-2xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+                    {malError}
+                  </div>
+                )}
+                {!malLoading && !malError && !entry.malId && (
+                  <div className="rounded-2xl border border-ink/10 bg-white/70 px-3 py-2 text-xs text-ink/60">
+                    No MAL ID found for this manga.
+                  </div>
+                )}
+                {!malLoading && !malError && entry.malId && (
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="min-w-[150px] rounded-2xl border border-ink/10 bg-white/80 px-3 py-3">
+                      <p className="text-xs uppercase tracking-[0.2em] text-ink/50">
+                        Score
+                      </p>
+                      <p className="mt-2 text-2xl font-semibold text-ink">
+                        {malStats?.score ?? "--"}
+                      </p>
+                    </div>
+                    <div className="min-w-[150px] rounded-2xl border border-ink/10 bg-white/80 px-3 py-3">
+                      <p className="text-xs uppercase tracking-[0.2em] text-ink/50">
+                        Popularity
+                      </p>
+                      <p className="mt-2 text-2xl font-semibold text-ink">
+                        {malStats?.popularity ? `#${malStats.popularity}` : "--"}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="rounded-3xl border border-ink/10 bg-white/70 p-5">
               <p className="label">Update</p>
               <div className="mt-4 grid gap-3">
                 <input
@@ -453,48 +495,6 @@ export function MangaDetailPage() {
                 {upcomingNotice && (
                   <div className="rounded-2xl border border-ink/10 bg-white/70 px-3 py-2 text-xs text-ink/70">
                     {upcomingNotice}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="rounded-3xl border border-ink/10 bg-white/70 p-5">
-              <p className="label">MAL stats</p>
-              <p className="text-sm text-ink/60">Score and popularity rank.</p>
-              <div className="mt-4 grid gap-3">
-                {malLoading && (
-                  <div className="rounded-2xl border border-ink/10 bg-white/70 px-3 py-2 text-xs text-ink/60">
-                    Loading MAL stats...
-                  </div>
-                )}
-                {malError && (
-                  <div className="rounded-2xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
-                    {malError}
-                  </div>
-                )}
-                {!malLoading && !malError && !entry.malId && (
-                  <div className="rounded-2xl border border-ink/10 bg-white/70 px-3 py-2 text-xs text-ink/60">
-                    No MAL ID found for this manga.
-                  </div>
-                )}
-                {!malLoading && !malError && entry.malId && (
-                  <div className="grid gap-3 md:grid-cols-2">
-                    <div className="rounded-2xl border border-ink/10 bg-white/80 px-3 py-3">
-                      <p className="text-xs uppercase tracking-[0.2em] text-ink/50">
-                        Score
-                      </p>
-                      <p className="mt-2 text-2xl font-semibold text-ink">
-                        {malStats?.score ?? "--"}
-                      </p>
-                    </div>
-                    <div className="rounded-2xl border border-ink/10 bg-white/80 px-3 py-3">
-                      <p className="text-xs uppercase tracking-[0.2em] text-ink/50">
-                        Popularity
-                      </p>
-                      <p className="mt-2 text-2xl font-semibold text-ink">
-                        {malStats?.popularity ? `#${malStats.popularity}` : "--"}
-                      </p>
-                    </div>
                   </div>
                 )}
               </div>
