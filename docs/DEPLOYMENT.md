@@ -16,6 +16,7 @@ This project is designed for Vercel (frontend) + Supabase (backend).
 - `VITE_SUPABASE_ANON_KEY`
 - No API key required for the OpenStreetMap bookstore search
 - `VITE_SITE_URL` (your Vercel URL, used for auth email redirects)
+  - Example: `https://manga-pulse-liart.vercel.app`
 
 After setting variables, trigger a new deploy.
 
