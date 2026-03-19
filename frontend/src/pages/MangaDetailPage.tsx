@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useCollection } from "../context/CollectionContext";
+import { getJikanMangaStats } from "../lib/jikan";
 import { supabase } from "../lib/supabaseClient";
 
 type ReleaseEntry = {
@@ -34,6 +35,12 @@ export function MangaDetailPage() {
   const [upcomingSaving, setUpcomingSaving] = useState(false);
   const [upcomingNotice, setUpcomingNotice] = useState<string | null>(null);
   const [upcomingError, setUpcomingError] = useState<string | null>(null);
+  const [malStats, setMalStats] = useState<{
+    score: number | null;
+    popularity: number | null;
+  } | null>(null);
+  const [malLoading, setMalLoading] = useState(false);
+  const [malError, setMalError] = useState<string | null>(null);
   const [places, setPlaces] = useState<PlaceEntry[]>([]);
   const [placesStatus, setPlacesStatus] = useState<"idle" | "loading" | "ready" | "error">(
     "idle"
@@ -91,6 +98,36 @@ export function MangaDetailPage() {
       setUpcomingVolume(String(suggested));
     }
   }, [entry?.id, upcomingVolume]);
+
+  useEffect(() => {
+    if (!entry?.malId) {
+      setMalStats(null);
+      return;
+    }
+
+    let alive = true;
+    setMalLoading(true);
+    setMalError(null);
+
+    getJikanMangaStats(entry.malId)
+      .then((stats) => {
+        if (!alive) return;
+        setMalStats({ score: stats.score, popularity: stats.popularity });
+      })
+      .catch(() => {
+        if (!alive) return;
+        setMalError("Could not load MAL stats.");
+        setMalStats(null);
+      })
+      .finally(() => {
+        if (!alive) return;
+        setMalLoading(false);
+      });
+
+    return () => {
+      alive = false;
+    };
+  }, [entry?.malId]);
 
   if (!entry) {
     return (
@@ -416,6 +453,48 @@ export function MangaDetailPage() {
                 {upcomingNotice && (
                   <div className="rounded-2xl border border-ink/10 bg-white/70 px-3 py-2 text-xs text-ink/70">
                     {upcomingNotice}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="rounded-3xl border border-ink/10 bg-white/70 p-5">
+              <p className="label">MAL stats</p>
+              <p className="text-sm text-ink/60">Score and popularity rank.</p>
+              <div className="mt-4 grid gap-3">
+                {malLoading && (
+                  <div className="rounded-2xl border border-ink/10 bg-white/70 px-3 py-2 text-xs text-ink/60">
+                    Loading MAL stats...
+                  </div>
+                )}
+                {malError && (
+                  <div className="rounded-2xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+                    {malError}
+                  </div>
+                )}
+                {!malLoading && !malError && !entry.malId && (
+                  <div className="rounded-2xl border border-ink/10 bg-white/70 px-3 py-2 text-xs text-ink/60">
+                    No MAL ID found for this manga.
+                  </div>
+                )}
+                {!malLoading && !malError && entry.malId && (
+                  <div className="grid gap-3 md:grid-cols-2">
+                    <div className="rounded-2xl border border-ink/10 bg-white/80 px-3 py-3">
+                      <p className="text-xs uppercase tracking-[0.2em] text-ink/50">
+                        Score
+                      </p>
+                      <p className="mt-2 text-2xl font-semibold text-ink">
+                        {malStats?.score ?? "--"}
+                      </p>
+                    </div>
+                    <div className="rounded-2xl border border-ink/10 bg-white/80 px-3 py-3">
+                      <p className="text-xs uppercase tracking-[0.2em] text-ink/50">
+                        Popularity
+                      </p>
+                      <p className="mt-2 text-2xl font-semibold text-ink">
+                        {malStats?.popularity ? `#${malStats.popularity}` : "--"}
+                      </p>
+                    </div>
                   </div>
                 )}
               </div>

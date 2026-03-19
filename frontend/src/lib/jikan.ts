@@ -22,3 +22,21 @@ export async function searchJikan(query: string, limit = 6): Promise<SearchResul
     totalVolumes: item.volumes ?? null,
   }));
 }
+
+export async function getJikanMangaStats(malId: number): Promise<{
+  score: number | null;
+  popularity: number | null;
+  url: string | null;
+}> {
+  const res = await fetch(`${JIKAN_BASE_URL}/manga/${malId}`);
+  if (!res.ok) {
+    throw new Error("Jikan request failed");
+  }
+  const body = await res.json();
+  const data = body?.data;
+  return {
+    score: typeof data?.score === "number" ? data.score : null,
+    popularity: typeof data?.popularity === "number" ? data.popularity : null,
+    url: data?.url ?? null,
+  };
+}
