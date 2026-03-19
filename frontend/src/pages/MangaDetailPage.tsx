@@ -54,7 +54,12 @@ export function MangaDetailPage() {
     null
   );
   const amazonDomain = (import.meta as any).env?.VITE_AMAZON_DOMAIN as string | undefined;
-  const OVERPASS_ENDPOINT = "https://overpass-api.de/api/interpreter";
+  const OVERPASS_ENDPOINTS = [
+    "https://overpass-api.de/api/interpreter",
+    "https://overpass.kumi.systems/api/interpreter",
+    "https://overpass.nchc.org.tw/api/interpreter",
+  ];
+  const OVERPASS_TIMEOUT_MS = 12000;
 
   const progress = useMemo(() => {
     if (!entry) return 0;
@@ -347,6 +352,48 @@ export function MangaDetailPage() {
     return full || null;
   };
 
+  const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+  const fetchOverpass = async (query: string) => {
+    let lastError: string | null = null;
+
+    for (const endpoint of OVERPASS_ENDPOINTS) {
+      for (let attempt = 0; attempt < 2; attempt += 1) {
+        const controller = new AbortController();
+        const timer = window.setTimeout(() => controller.abort(), OVERPASS_TIMEOUT_MS);
+
+        try {
+          const response = await fetch(endpoint, {
+            method: "POST",
+            headers: {
+              "content-type": "application/x-www-form-urlencoded",
+            },
+            body: new URLSearchParams({ data: query }).toString(),
+            signal: controller.signal,
+          });
+
+          if (!response.ok) {
+            lastError = `${endpoint} responded ${response.status}`;
+            continue;
+          }
+
+          const data = await response.json();
+          return { data, endpoint };
+        } catch (error) {
+          lastError = error instanceof Error ? error.message : "Request failed";
+        } finally {
+          window.clearTimeout(timer);
+        }
+
+        if (attempt === 0) {
+          await sleep(600);
+        }
+      }
+    }
+
+    throw new Error(lastError ?? "OpenStreetMap request failed.");
+  };
+
   const handleUseLocation = async () => {
     if (!navigator.geolocation) {
       setPlacesStatus("error");
@@ -368,7 +415,7 @@ export function MangaDetailPage() {
       const lat = position.coords.latitude;
       const lon = position.coords.longitude;
       setUserLocation({ lat, lon });
-      const radius = 30000;
+      const radius = 15000;
       const query = `
         [out:json][timeout:25];
         (
@@ -382,22 +429,7 @@ export function MangaDetailPage() {
         out center 30;
       `;
 
-      const response = await fetch(OVERPASS_ENDPOINT, {
-        method: "POST",
-        headers: {
-          "content-type": "application/x-www-form-urlencoded",
-        },
-        body: new URLSearchParams({ data: query }).toString(),
-      });
-
-      if (!response.ok) {
-        setPlacesStatus("error");
-        setPlacesError("OpenStreetMap request failed.");
-        setPlaces([]);
-        return;
-      }
-
-      const data = await response.json();
+      const { data } = await fetchOverpass(query);
       const elements = Array.isArray(data?.elements) ? data.elements : [];
       const mapped: PlaceEntry[] = elements
         .map((element: any) => {
@@ -428,7 +460,9 @@ export function MangaDetailPage() {
       setPlacesStatus("ready");
     } catch {
       setPlacesStatus("error");
-      setPlacesError("Location access was denied or timed out.");
+      setPlacesError(
+        "OpenStreetMap request failed. Please retry in a moment or refresh the page."
+      );
     }
   };
 
@@ -625,7 +659,7 @@ export function MangaDetailPage() {
         <div className="space-y-6">
           <div className="glass-card hover-lift reveal reveal-delay-1 rounded-[32px] p-6 md:p-8">
             <p className="label">Nearby bookstores</p>
-            <h3 className="font-display text-2xl">Find a shop within 30km</h3>
+            <h3 className="font-display text-2xl">Find a shop within 15km</h3>
             <p className="text-sm text-ink/60">
               Powered by OpenStreetMap. No API key required, just allow location access
               to find nearby bookstores.
@@ -701,7 +735,7 @@ export function MangaDetailPage() {
           <div className="mt-6 space-y-3 text-sm text-ink/60">
             <p>Planned UX:</p>
               <ul className="list-disc pl-5">
-                <li>Find stores within 30km radius</li>
+                <li>Find stores within 15km radius</li>
                 <li>Show distance + open hours</li>
                 <li>Quick link to call or reserve</li>
               </ul>
