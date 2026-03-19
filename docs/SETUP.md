@@ -2,6 +2,9 @@
 
 This doc covers local development for the frontend and Supabase resources.
 
+**Related Feature Docs**
+- `docs/features/README.md`
+
 **Prerequisites**
 - Node.js 18+
 - npm

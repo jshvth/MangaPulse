@@ -6,6 +6,8 @@ MangaPulse is a KI-native web app for tracking manga collections and surfacing n
 - `docs/SETUP.md`
 - `docs/DEPLOYMENT.md`
 - `docs/ARCHITECTURE.md`
+- `docs/STATUS.md`
+- `docs/features/README.md`
 
 **Features**
 - Collection dashboard with progress tracking
@@ -13,6 +15,9 @@ MangaPulse is a KI-native web app for tracking manga collections and surfacing n
 - Release history and notification flags
 - Supabase Auth + Postgres persistence
 - Edge Function release scan (cron)
+
+**Feature Docs Index**
+- `docs/features/README.md`
 
 **Data Sources**
 - Jikan (MyAnimeList data)

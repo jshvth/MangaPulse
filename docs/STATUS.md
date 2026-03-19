@@ -2,6 +2,9 @@
 
 This document summarizes what is implemented, what is not fully working yet (and why), plus the alternatives currently in place.
 
+**Related Feature Docs**
+- `docs/features/README.md`
+
 **Working (Implemented)**
 - Auth with Supabase (sign up, sign in, sign out)
 - Persistent user collection stored in `user_mangas`
@@ -13,7 +16,7 @@ This document summarizes what is implemented, what is not fully working yet (and
 - New release flags via `needs_notification`
 - Manual upcoming release entry (volume + date)
 - Automated release date discovery via Google Books (optional)
-- Location search UI (Google Places integration ready)
+- Location search UI (OpenStreetMap + Overpass)
 
 **Not Fully Working Yet (and Why)**
 - **Email notifications**
@@ -22,9 +25,9 @@ This document summarizes what is implemented, what is not fully working yet (and
 - **Automatic volume release dates from anime/manga APIs**
   - Why: Jikan/AniList do not provide consistent **per-volume release dates**.
   - Current status: We use Google Books as an optional alternative and allow manual entry.
-- **Google Places live search**
-  - Why: Requires a Google Maps API key with billing enabled.
-  - Current status: Feature is implemented, but won’t work until `VITE_GOOGLE_PLACES_KEY` is set.
+- **OpenStreetMap availability**
+  - Why: Overpass instances can rate-limit or be temporarily unavailable.
+  - Current status: Fallback endpoints + retry logic are implemented.
 
 **Alternatives Implemented**
 - **Email → In-app notifications**
@@ -33,8 +36,8 @@ This document summarizes what is implemented, what is not fully working yet (and
 - **Missing release dates → Google Books + manual entry**
   - Google Books is used to infer release dates (optional API key).
   - Manual entry on the detail page lets us cover missing data.
-- **Location feature blocked by key → fallback link**
-  - If key is missing, the UI still offers a Google Maps search link.
+- **Email testing → Ethereal**
+  - A local sender script can deliver test emails via Ethereal.
 
 **Current Automation Pipeline (End-to-End)**
 1. Cron runs every 3 days.
@@ -49,7 +52,7 @@ This document summarizes what is implemented, what is not fully working yet (and
 **Known Limitations**
 - Google Books matching is heuristic and may miss or mis-match some volumes.
 - Release dates can be incomplete or only month/year; we convert to a full date.
-- Without Google Places key, the “Use my location” button cannot query stores.
+- Overpass rate limits can temporarily block location search requests.
 
 **Next Steps (If Needed)**
 - Verify a domain to enable Resend email delivery.

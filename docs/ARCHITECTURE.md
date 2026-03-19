@@ -2,6 +2,9 @@
 
 MangaPulse uses a React frontend, Supabase for auth + storage, and a scheduled Edge Function for release checks.
 
+**Related Feature Docs**
+- `docs/features/README.md`
+
 **Data Model**
 - `user_mangas` stores the user library
 - `manga_releases` stores detected releases
