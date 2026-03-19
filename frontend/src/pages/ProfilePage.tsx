@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { supabase } from "../lib/supabaseClient";
 
@@ -24,6 +25,14 @@ const emptyProfile: ProfileState = {
   favorite_3: "",
 };
 
+type MiniProfile = {
+  user_id: string;
+  display_name: string | null;
+  avatar_url: string | null;
+  location_city: string | null;
+  location_country: string | null;
+};
+
 export function ProfilePage() {
   const { user } = useAuth();
   const [profile, setProfile] = useState<ProfileState>(emptyProfile);
@@ -32,6 +41,9 @@ export function ProfilePage() {
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [following, setFollowing] = useState<MiniProfile[]>([]);
+  const [followers, setFollowers] = useState<MiniProfile[]>([]);
+  const [socialLoading, setSocialLoading] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -163,6 +175,53 @@ export function ProfilePage() {
     }
     setUploading(false);
   };
+
+  useEffect(() => {
+    if (!user) return;
+    let alive = true;
+    setSocialLoading(true);
+
+    const loadSocial = async () => {
+      const { data: followingRows } = await supabase
+        .from("user_follows")
+        .select("following_id")
+        .eq("follower_id", user.id);
+
+      const followingIds = (followingRows ?? []).map((row) => row.following_id);
+
+      const { data: followerRows } = await supabase
+        .from("user_follows")
+        .select("follower_id")
+        .eq("following_id", user.id);
+
+      const followerIds = (followerRows ?? []).map((row) => row.follower_id);
+
+      const { data: followingProfiles } = followingIds.length
+        ? await supabase
+            .from("user_profiles")
+            .select("user_id, display_name, avatar_url, location_city, location_country")
+            .in("user_id", followingIds)
+        : { data: [] };
+
+      const { data: followerProfiles } = followerIds.length
+        ? await supabase
+            .from("user_profiles")
+            .select("user_id, display_name, avatar_url, location_city, location_country")
+            .in("user_id", followerIds)
+        : { data: [] };
+
+      if (!alive) return;
+      setFollowing((followingProfiles ?? []) as MiniProfile[]);
+      setFollowers((followerProfiles ?? []) as MiniProfile[]);
+      setSocialLoading(false);
+    };
+
+    loadSocial();
+
+    return () => {
+      alive = false;
+    };
+  }, [user?.id]);
 
   return (
     <div className="space-y-8">
@@ -310,6 +369,105 @@ export function ProfilePage() {
               setProfile((prev) => ({ ...prev, favorite_3: event.target.value }))
             }
           />
+        </div>
+      </section>
+
+      <section className="glass-card hover-lift reveal reveal-delay-3 rounded-[32px] p-6 md:p-8">
+        <p className="label">Connections</p>
+        <h3 className="font-display text-2xl">Following & followers</h3>
+        <p className="text-sm text-ink/60">
+          See who you follow and who follows you.
+        </p>
+        <div className="mt-6 grid gap-6 md:grid-cols-2">
+          <div className="space-y-3">
+            <p className="text-xs uppercase tracking-[0.2em] text-ink/50">
+              Following ({following.length})
+            </p>
+            {socialLoading && (
+              <div className="rounded-2xl border border-ink/10 bg-white/70 p-3 text-sm text-ink/60">
+                Loading...
+              </div>
+            )}
+            {!socialLoading && following.length === 0 && (
+              <div className="rounded-2xl border border-ink/10 bg-white/70 p-3 text-sm text-ink/60">
+                You are not following anyone yet.
+              </div>
+            )}
+            {following.map((item) => (
+              <Link
+                key={item.user_id}
+                to={`/profiles/${item.user_id}`}
+                className="flex items-center gap-3 rounded-2xl border border-ink/10 bg-white/80 p-3"
+              >
+                <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-ink/10 bg-white">
+                  {item.avatar_url ? (
+                    <img
+                      src={item.avatar_url}
+                      alt={item.display_name ?? "Profile"}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-[10px] text-ink/40">No image</span>
+                  )}
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-ink">
+                    {item.display_name ?? "Unnamed"}
+                  </p>
+                  <p className="text-xs text-ink/50">
+                    {item.location_city
+                      ? `${item.location_city}${item.location_country ? `, ${item.location_country}` : ""}`
+                      : "Location hidden"}
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
+
+          <div className="space-y-3">
+            <p className="text-xs uppercase tracking-[0.2em] text-ink/50">
+              Followers ({followers.length})
+            </p>
+            {socialLoading && (
+              <div className="rounded-2xl border border-ink/10 bg-white/70 p-3 text-sm text-ink/60">
+                Loading...
+              </div>
+            )}
+            {!socialLoading && followers.length === 0 && (
+              <div className="rounded-2xl border border-ink/10 bg-white/70 p-3 text-sm text-ink/60">
+                No followers yet.
+              </div>
+            )}
+            {followers.map((item) => (
+              <Link
+                key={item.user_id}
+                to={`/profiles/${item.user_id}`}
+                className="flex items-center gap-3 rounded-2xl border border-ink/10 bg-white/80 p-3"
+              >
+                <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-ink/10 bg-white">
+                  {item.avatar_url ? (
+                    <img
+                      src={item.avatar_url}
+                      alt={item.display_name ?? "Profile"}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-[10px] text-ink/40">No image</span>
+                  )}
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-ink">
+                    {item.display_name ?? "Unnamed"}
+                  </p>
+                  <p className="text-xs text-ink/50">
+                    {item.location_city
+                      ? `${item.location_city}${item.location_country ? `, ${item.location_country}` : ""}`
+                      : "Location hidden"}
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
         </div>
       </section>
 

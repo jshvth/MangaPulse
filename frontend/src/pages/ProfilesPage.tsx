@@ -1,6 +1,7 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "../lib/supabaseClient";
+import { useAuth } from "../context/AuthContext";
 
 type ProfileResult = {
   user_id: string;
@@ -15,11 +16,13 @@ type ProfileResult = {
 };
 
 export function ProfilesPage() {
+  const { user } = useAuth();
   const [query, setQuery] = useState("");
   const [mode, setMode] = useState<"name" | "city">("name");
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<ProfileResult[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [followingIds, setFollowingIds] = useState<string[]>([]);
 
   const favorites = (profile: ProfileResult) =>
     [profile.favorite_1, profile.favorite_2, profile.favorite_3].filter(Boolean) as string[];
@@ -36,6 +39,24 @@ export function ProfilesPage() {
     );
     return [...exact, ...rest];
   }, [results, mode, query]);
+
+  useEffect(() => {
+    if (!user) return;
+    let alive = true;
+
+    supabase
+      .from("user_follows")
+      .select("following_id")
+      .eq("follower_id", user.id)
+      .then(({ data }) => {
+        if (!alive) return;
+        setFollowingIds((data ?? []).map((row) => row.following_id));
+      });
+
+    return () => {
+      alive = false;
+    };
+  }, [user?.id]);
 
   const handleSearch = async () => {
     const trimmed = query.trim();
@@ -140,6 +161,11 @@ export function ProfilesPage() {
                       ? `${profile.location_city}${profile.location_country ? `, ${profile.location_country}` : ""}`
                       : "Location hidden"}
                   </p>
+                  {followingIds.includes(profile.user_id) && (
+                    <span className="mt-2 inline-flex rounded-full bg-ink/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-ink/60">
+                      Following
+                    </span>
+                  )}
                 </div>
               </div>
               {profile.bio && (
