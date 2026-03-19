@@ -5,6 +5,8 @@ import { AuthPage } from "./pages/AuthPage";
 import { CollectionPage } from "./pages/CollectionPage";
 import { MangaDetailPage } from "./pages/MangaDetailPage";
 import { ProfilePage } from "./pages/ProfilePage";
+import { ProfilesPage } from "./pages/ProfilesPage";
+import { PublicProfilePage } from "./pages/PublicProfilePage";
 import { AuthGate } from "./components/AuthGate";
 
 function App() {
@@ -28,6 +30,22 @@ function App() {
             element={
               <AuthGate>
                 <MangaDetailPage />
+              </AuthGate>
+            }
+          />
+          <Route
+            path="/profiles"
+            element={
+              <AuthGate>
+                <ProfilesPage />
+              </AuthGate>
+            }
+          />
+          <Route
+            path="/profiles/:id"
+            element={
+              <AuthGate>
+                <PublicProfilePage />
               </AuthGate>
             }
           />

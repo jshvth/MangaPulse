@@ -1,0 +1,168 @@
+import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
+import { supabase } from "../lib/supabaseClient";
+
+type ProfileResult = {
+  user_id: string;
+  display_name: string | null;
+  avatar_url: string | null;
+  location_city: string | null;
+  location_country: string | null;
+  favorite_1: string | null;
+  favorite_2: string | null;
+  favorite_3: string | null;
+  bio: string | null;
+};
+
+export function ProfilesPage() {
+  const [query, setQuery] = useState("");
+  const [mode, setMode] = useState<"name" | "city">("name");
+  const [loading, setLoading] = useState(false);
+  const [results, setResults] = useState<ProfileResult[]>([]);
+  const [error, setError] = useState<string | null>(null);
+
+  const favorites = (profile: ProfileResult) =>
+    [profile.favorite_1, profile.favorite_2, profile.favorite_3].filter(Boolean) as string[];
+
+  const sortedResults = useMemo(() => {
+    if (mode !== "name") return results;
+    const normalizedQuery = query.trim().toLowerCase();
+    if (!normalizedQuery) return results;
+    const exact = results.filter(
+      (item) => item.display_name?.toLowerCase() === normalizedQuery
+    );
+    const rest = results.filter(
+      (item) => item.display_name?.toLowerCase() !== normalizedQuery
+    );
+    return [...exact, ...rest];
+  }, [results, mode, query]);
+
+  const handleSearch = async () => {
+    const trimmed = query.trim();
+    if (!trimmed) return;
+    setLoading(true);
+    setError(null);
+
+    let request = supabase
+      .from("user_profiles")
+      .select(
+        "user_id, display_name, avatar_url, location_city, location_country, favorite_1, favorite_2, favorite_3, bio"
+      )
+      .limit(30);
+
+    if (mode === "name") {
+      request = request.ilike("display_name", `%${trimmed}%`);
+    } else {
+      request = request.ilike("location_city", `%${trimmed}%`);
+    }
+
+    const { data, error } = await request;
+    if (error) {
+      setError(error.message);
+      setResults([]);
+    } else {
+      setResults(data ?? []);
+    }
+    setLoading(false);
+  };
+
+  return (
+    <div className="space-y-8">
+      <section className="reveal flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <p className="label">Community</p>
+          <h2 className="font-display text-3xl">Find collectors</h2>
+          <p className="text-sm text-ink/60">
+            Search by name for direct matches or by city to find nearby readers.
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <button
+            className={mode === "name" ? "btn-primary" : "btn-ghost"}
+            onClick={() => setMode("name")}
+          >
+            Name
+          </button>
+          <button
+            className={mode === "city" ? "btn-primary" : "btn-ghost"}
+            onClick={() => setMode("city")}
+          >
+            City
+          </button>
+        </div>
+      </section>
+
+      <section className="glass-card hover-lift reveal rounded-[32px] p-6 md:p-8">
+        <div className="grid gap-3 md:grid-cols-[1fr_auto]">
+          <input
+            className="input-field"
+            placeholder={mode === "name" ? "Search by name" : "Search by city"}
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+          />
+          <button className="btn-primary" onClick={handleSearch}>
+            {loading ? "Searching..." : "Search"}
+          </button>
+        </div>
+        {error && (
+          <div className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {error}
+          </div>
+        )}
+      </section>
+
+      <section className="reveal reveal-delay-1">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {sortedResults.map((profile) => (
+            <Link
+              key={profile.user_id}
+              to={`/profiles/${profile.user_id}`}
+              className="glass-card hover-lift rounded-3xl p-5"
+            >
+              <div className="flex items-center gap-4">
+                <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border border-ink/10 bg-white">
+                  {profile.avatar_url ? (
+                    <img
+                      src={profile.avatar_url}
+                      alt={profile.display_name ?? "Profile"}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-xs text-ink/40">No image</span>
+                  )}
+                </div>
+                <div>
+                  <p className="font-semibold text-ink">
+                    {profile.display_name ?? "Unnamed"}
+                  </p>
+                  <p className="text-xs text-ink/50">
+                    {profile.location_city
+                      ? `${profile.location_city}${profile.location_country ? `, ${profile.location_country}` : ""}`
+                      : "Location hidden"}
+                  </p>
+                </div>
+              </div>
+              {profile.bio && (
+                <p className="mt-4 text-sm text-ink/60 line-clamp-3">{profile.bio}</p>
+              )}
+              {favorites(profile).length > 0 && (
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {favorites(profile).map((fav) => (
+                    <span key={fav} className="chip text-[10px]">
+                      {fav}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </Link>
+          ))}
+        </div>
+        {!loading && sortedResults.length === 0 && query.trim() && (
+          <div className="mt-6 rounded-2xl border border-ink/10 bg-white/70 p-4 text-sm text-ink/60">
+            No profiles found. Try another search.
+          </div>
+        )}
+      </section>
+    </div>
+  );
+}
