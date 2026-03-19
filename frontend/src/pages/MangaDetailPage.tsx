@@ -14,12 +14,13 @@ type ReleaseEntry = {
 };
 
 type PlaceEntry = {
-  place_id: string;
+  id: string;
   name: string;
-  vicinity?: string;
-  rating?: number;
-  user_ratings_total?: number;
-  geometry?: { location?: { lat: () => number; lng: () => number } };
+  address?: string;
+  lat: number;
+  lon: number;
+  distanceKm?: number;
+  osmUrl?: string;
 };
 
 export function MangaDetailPage() {
@@ -49,8 +50,8 @@ export function MangaDetailPage() {
     "idle"
   );
   const [placesError, setPlacesError] = useState<string | null>(null);
-  const googleKey = (import.meta as any).env?.VITE_GOOGLE_PLACES_KEY as string | undefined;
   const amazonDomain = (import.meta as any).env?.VITE_AMAZON_DOMAIN as string | undefined;
+  const OVERPASS_ENDPOINT = "https://overpass-api.de/api/interpreter";
 
   const progress = useMemo(() => {
     if (!entry) return 0;
@@ -316,43 +317,34 @@ export function MangaDetailPage() {
     setVolumeLoading(false);
   };
 
-  const loadGooglePlaces = () =>
-    new Promise<void>((resolve, reject) => {
-      const google = (window as any).google;
-      if (google?.maps?.places) {
-        resolve();
-        return;
-      }
+  const toRadians = (value: number) => (value * Math.PI) / 180;
 
-      if (!googleKey) {
-        reject(new Error("Missing Google Places API key"));
-        return;
-      }
+  const distanceKm = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+    const radius = 6371;
+    const dLat = toRadians(lat2 - lat1);
+    const dLon = toRadians(lon2 - lon1);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(toRadians(lat1)) *
+        Math.cos(toRadians(lat2)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+    return radius * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  };
 
-      const existing = document.getElementById("google-places-script");
-      if (existing) {
-        existing.addEventListener("load", () => resolve());
-        existing.addEventListener("error", () => reject(new Error("Failed to load Google Maps")));
-        return;
-      }
-
-      const script = document.createElement("script");
-      script.id = "google-places-script";
-      script.async = true;
-      script.defer = true;
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${googleKey}&libraries=places`;
-      script.onload = () => resolve();
-      script.onerror = () => reject(new Error("Failed to load Google Maps"));
-      document.head.appendChild(script);
-    });
+  const formatAddress = (tags: Record<string, string> | undefined) => {
+    if (!tags) return null;
+    const street = tags["addr:street"];
+    const house = tags["addr:housenumber"];
+    const city = tags["addr:city"];
+    const postcode = tags["addr:postcode"];
+    const line1 = [street, house].filter(Boolean).join(" ");
+    const line2 = [postcode, city].filter(Boolean).join(" ");
+    const full = [line1, line2].filter(Boolean).join(", ");
+    return full || null;
+  };
 
   const handleUseLocation = async () => {
-    if (!googleKey) {
-      setPlacesStatus("error");
-      setPlacesError("Missing Google Places API key.");
-      return;
-    }
-
     if (!navigator.geolocation) {
       setPlacesStatus("error");
       setPlacesError("Geolocation is not available in this browser.");
@@ -370,43 +362,66 @@ export function MangaDetailPage() {
         });
       });
 
-      await loadGooglePlaces();
+      const lat = position.coords.latitude;
+      const lon = position.coords.longitude;
+      const radius = 30000;
+      const query = `
+        [out:json][timeout:25];
+        (
+          node["shop"="books"](around:${radius},${lat},${lon});
+          node["amenity"="bookstore"](around:${radius},${lat},${lon});
+          way["shop"="books"](around:${radius},${lat},${lon});
+          way["amenity"="bookstore"](around:${radius},${lat},${lon});
+          relation["shop"="books"](around:${radius},${lat},${lon});
+          relation["amenity"="bookstore"](around:${radius},${lat},${lon});
+        );
+        out center 30;
+      `;
 
-      const google = (window as any).google;
-      const location = new google.maps.LatLng(
-        position.coords.latitude,
-        position.coords.longitude
-      );
-
-      const mapDiv = document.createElement("div");
-      mapDiv.style.width = "1px";
-      mapDiv.style.height = "1px";
-      mapDiv.style.position = "absolute";
-      mapDiv.style.left = "-9999px";
-      document.body.appendChild(mapDiv);
-
-      const map = new google.maps.Map(mapDiv, { center: location, zoom: 12 });
-      const service = new google.maps.places.PlacesService(map);
-
-      service.nearbySearch(
-        {
-          location,
-          radius: 30000,
-          type: "book_store",
-          keyword: "manga",
+      const response = await fetch(OVERPASS_ENDPOINT, {
+        method: "POST",
+        headers: {
+          "content-type": "application/x-www-form-urlencoded",
         },
-        (results: any, status: string) => {
-          document.body.removeChild(mapDiv);
-          if (status !== google.maps.places.PlacesServiceStatus.OK || !results) {
-            setPlacesStatus("error");
-            setPlacesError("No nearby bookstores found.");
-            setPlaces([]);
-            return;
+        body: new URLSearchParams({ data: query }).toString(),
+      });
+
+      if (!response.ok) {
+        setPlacesStatus("error");
+        setPlacesError("OpenStreetMap request failed.");
+        setPlaces([]);
+        return;
+      }
+
+      const data = await response.json();
+      const elements = Array.isArray(data?.elements) ? data.elements : [];
+      const mapped: PlaceEntry[] = elements
+        .map((element: any) => {
+          const elementLat = element.lat ?? element.center?.lat;
+          const elementLon = element.lon ?? element.center?.lon;
+          if (typeof elementLat !== "number" || typeof elementLon !== "number") {
+            return null;
           }
-          setPlaces(results as PlaceEntry[]);
-          setPlacesStatus("ready");
-        }
-      );
+          const name = element.tags?.name ?? "Bookstore";
+          const address = formatAddress(element.tags);
+          const distance = distanceKm(lat, lon, elementLat, elementLon);
+          const osmUrl = `https://www.openstreetmap.org/?mlat=${elementLat}&mlon=${elementLon}#map=17/${elementLat}/${elementLon}`;
+
+          return {
+            id: `${element.type}-${element.id}`,
+            name,
+            address: address ?? undefined,
+            lat: elementLat,
+            lon: elementLon,
+            distanceKm: distance,
+            osmUrl,
+          };
+        })
+        .filter(Boolean) as PlaceEntry[];
+
+      mapped.sort((a, b) => (a.distanceKm ?? 0) - (b.distanceKm ?? 0));
+      setPlaces(mapped);
+      setPlacesStatus("ready");
     } catch {
       setPlacesStatus("error");
       setPlacesError("Location access was denied or timed out.");
@@ -608,15 +623,15 @@ export function MangaDetailPage() {
             <p className="label">Nearby bookstores</p>
             <h3 className="font-display text-2xl">Find a shop within 30km</h3>
             <p className="text-sm text-ink/60">
-              Connect the Places API to get live availability near you. Add
-              your Google Maps key to activate the search.
+              Powered by OpenStreetMap. No API key required, just allow location access
+              to find nearby bookstores.
             </p>
 
           <div className="mt-6 grid gap-3 rounded-3xl border border-dashed border-ink/20 bg-white/70 p-5">
             <div className="flex items-center justify-between text-sm">
               <span className="text-ink/60">API status</span>
               <span className="chip">
-                {googleKey ? "Key detected" : "Key missing"}
+                OpenStreetMap ready
               </span>
             </div>
             <button className="btn-ghost" onClick={handleUseLocation}>
@@ -624,13 +639,13 @@ export function MangaDetailPage() {
             </button>
             <a
               className="btn-primary"
-              href={`https://www.google.com/maps/search/${encodeURIComponent(
+              href={`https://www.openstreetmap.org/search?query=${encodeURIComponent(
                 "bookstore near me"
-                )}`}
+              )}`}
                 target="_blank"
                 rel="noreferrer"
             >
-              Open Google Maps
+              Open OpenStreetMap
             </a>
           </div>
           <div className="mt-6 space-y-3">
@@ -643,17 +658,27 @@ export function MangaDetailPage() {
               <div className="grid gap-3">
                 {places.slice(0, 6).map((place) => (
                   <div
-                    key={place.place_id}
+                    key={place.id}
                     className="rounded-2xl border border-ink/10 bg-white/80 p-4"
                   >
                     <p className="font-semibold text-ink">{place.name}</p>
-                    {place.vicinity && (
-                      <p className="text-xs text-ink/50">{place.vicinity}</p>
+                    {place.address && (
+                      <p className="text-xs text-ink/50">{place.address}</p>
                     )}
-                    {typeof place.rating === "number" && (
+                    {typeof place.distanceKm === "number" && (
                       <p className="text-xs text-ink/50">
-                        Rating: {place.rating} ({place.user_ratings_total ?? 0})
+                        Approx. {place.distanceKm.toFixed(1)} km away
                       </p>
+                    )}
+                    {place.osmUrl && (
+                      <a
+                        className="btn-ghost mt-2 inline-flex"
+                        href={place.osmUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        Open in OSM
+                      </a>
                     )}
                   </div>
                 ))}
