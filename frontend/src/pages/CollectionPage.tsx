@@ -154,22 +154,22 @@ export function CollectionPage() {
             Keep owned volumes accurate so the next scan is precise.
           </p>
           <div className="mt-6 space-y-4">
-            <div className="rounded-2xl border border-ink/10 bg-white/80 p-4">
-              <p className="text-xs uppercase tracking-[0.2em] text-ink/50">
+            <div className="neo-panel rounded-2xl p-4">
+              <p className="text-xs uppercase tracking-[0.2em] text-ink/70">
                 Next scan
               </p>
               <p className="mt-2 text-2xl font-semibold text-ink">In 3 days</p>
             </div>
-            <div className="rounded-2xl border border-ink/10 bg-white/80 p-4">
-              <p className="text-xs uppercase tracking-[0.2em] text-ink/50">
+            <div className="neo-panel rounded-2xl p-4">
+              <p className="text-xs uppercase tracking-[0.2em] text-ink/70">
                 Coverage
               </p>
               <p className="mt-2 text-2xl font-semibold text-ink">
                 {totalSeries} series tracked
               </p>
             </div>
-            <div className="rounded-2xl border border-ink/10 bg-white/80 p-4">
-              <p className="text-xs uppercase tracking-[0.2em] text-ink/50">
+            <div className="neo-panel rounded-2xl p-4">
+              <p className="text-xs uppercase tracking-[0.2em] text-ink/70">
                 Updates flagged
               </p>
               <p className="mt-2 text-2xl font-semibold text-ink">
@@ -230,7 +230,7 @@ export function CollectionPage() {
                 </div>
                 <div className="mt-4 flex items-center justify-between text-xs text-ink/60">
                   <select
-                    className="rounded-full border border-ink/10 bg-white/80 px-3 py-1"
+                    className="neo-select rounded-full px-3 py-1"
                     value={item.status}
                     onChange={(event) => {
                       event.stopPropagation();
