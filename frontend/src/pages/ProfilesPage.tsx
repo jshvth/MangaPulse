@@ -29,15 +29,22 @@ export function ProfilesPage() {
   const favorites = (profile: ProfileResult) =>
     [profile.favorite_1, profile.favorite_2, profile.favorite_3].filter(Boolean) as string[];
 
+  const normalizeQuery = (value: string) =>
+    value
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .trim();
+
   const sortedResults = useMemo(() => {
     if (mode !== "name") return results;
-    const normalizedQuery = query.trim().toLowerCase();
+    const normalizedQuery = normalizeQuery(query);
     if (!normalizedQuery) return results;
     const exact = results.filter(
-      (item) => item.display_name?.toLowerCase() === normalizedQuery
+      (item) => normalizeQuery(item.display_name ?? "") === normalizedQuery
     );
     const rest = results.filter(
-      (item) => item.display_name?.toLowerCase() !== normalizedQuery
+      (item) => normalizeQuery(item.display_name ?? "") !== normalizedQuery
     );
     return [...exact, ...rest];
   }, [results, mode, query]);
@@ -63,6 +70,7 @@ export function ProfilesPage() {
   const handleSearch = async () => {
     const trimmed = query.trim();
     if (!trimmed) return;
+    const normalized = normalizeQuery(trimmed);
     setLoading(true);
     setError(null);
 
@@ -74,9 +82,9 @@ export function ProfilesPage() {
       .limit(30);
 
     if (mode === "name") {
-      request = request.ilike("display_name", `%${trimmed}%`);
+      request = request.ilike("display_name_search", `%${normalized}%`);
     } else {
-      request = request.ilike("location_city", `%${trimmed}%`);
+      request = request.ilike("location_city_search", `%${normalized}%`);
     }
 
     const { data, error } = await request;

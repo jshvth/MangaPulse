@@ -8,6 +8,7 @@
 - Follow/unfollow from search results.
 - Profile page shows followers + following lists.
 - Profiles are auto-created on signup (display name seeded).
+- Search uses normalized fields (accent-insensitive) for better matches.
 
 **Data / Tables**
 - `user_profiles`
