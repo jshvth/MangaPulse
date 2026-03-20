@@ -257,11 +257,6 @@ export function ProfilesPage() {
             </Link>
           ))}
         </div>
-        {!loading && sortedResults.length === 0 && query.trim() && (
-          <div className="neo-panel mt-6 rounded-2xl p-4 text-sm text-ink/70">
-            No profiles found. Try another search.
-          </div>
-        )}
       </section>
     </div>
   );
