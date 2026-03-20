@@ -93,7 +93,7 @@ export function ProfilePage() {
     setError(null);
     setNotice(null);
 
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from("user_profiles")
       .upsert({
         user_id: user.id,
@@ -105,11 +105,27 @@ export function ProfilePage() {
         favorite_1: profile.favorite_1.trim() || null,
         favorite_2: profile.favorite_2.trim() || null,
         favorite_3: profile.favorite_3.trim() || null,
-      });
+      })
+      .select(
+        "display_name, location_city, location_country, bio, avatar_url, favorite_1, favorite_2, favorite_3"
+      )
+      .maybeSingle();
 
     if (error) {
       setError(error.message);
     } else {
+      if (data) {
+        setProfile({
+          display_name: data.display_name ?? "",
+          location_city: data.location_city ?? "",
+          location_country: data.location_country ?? "",
+          bio: data.bio ?? "",
+          avatar_url: data.avatar_url ?? "",
+          favorite_1: data.favorite_1 ?? "",
+          favorite_2: data.favorite_2 ?? "",
+          favorite_3: data.favorite_3 ?? "",
+        });
+      }
       setNotice("Profile saved.");
     }
     setSaving(false);

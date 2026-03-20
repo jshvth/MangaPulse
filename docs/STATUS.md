@@ -18,6 +18,8 @@ This document summarizes what is implemented, what is not fully working yet (and
 - Manual upcoming release entry (volume + date)
 - Automated release date discovery via Google Books (optional)
 - Location search UI (OpenStreetMap + Overpass)
+- Community search (name/city) with follow/unfollow
+- Public profile view with read-only collection preview (signed-in users)
 
 **Not Fully Working Yet (and Why)**
 - **Email notifications**

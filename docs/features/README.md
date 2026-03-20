@@ -13,3 +13,4 @@ This folder tracks all feature-level documentation. Each feature has its own fil
 - `docs/features/volumes.md`
 - `docs/features/profile.md`
 - `docs/features/community.md`
+- `docs/features/public-profile-collection.md`

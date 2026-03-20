@@ -7,6 +7,7 @@ export function TopNav() {
   const { isAuthed, signOut, user } = useAuth();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
 
   const closeMenu = () => setMenuOpen(false);
 
@@ -115,13 +116,17 @@ export function TopNav() {
             <span className="hidden text-xs text-ink/50 sm:inline">{user?.email}</span>
             <button
               onClick={async () => {
+                if (signingOut) return;
+                setSigningOut(true);
                 await signOut();
                 navigate("/");
                 closeMenu();
+                setSigningOut(false);
               }}
               className="hover:text-ink"
+              disabled={signingOut}
             >
-              Sign out
+              {signingOut ? "Signing out..." : "Sign out"}
             </button>
           </div>
         ) : (

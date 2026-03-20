@@ -154,13 +154,13 @@ export function CollectionPage() {
             Keep owned volumes accurate so the next scan is precise.
           </p>
           <div className="mt-6 space-y-4">
-            <div className="neo-panel rounded-2xl p-4">
+            <div className="pulse-panel rounded-2xl p-4">
               <p className="text-xs uppercase tracking-[0.2em] text-ink/70">
                 Next scan
               </p>
               <p className="mt-2 text-2xl font-semibold text-ink">In 3 days</p>
             </div>
-            <div className="neo-panel rounded-2xl p-4">
+            <div className="pulse-panel rounded-2xl p-4">
               <p className="text-xs uppercase tracking-[0.2em] text-ink/70">
                 Coverage
               </p>
@@ -168,7 +168,7 @@ export function CollectionPage() {
                 {totalSeries} series tracked
               </p>
             </div>
-            <div className="neo-panel rounded-2xl p-4">
+            <div className="pulse-panel rounded-2xl p-4">
               <p className="text-xs uppercase tracking-[0.2em] text-ink/70">
                 Updates flagged
               </p>

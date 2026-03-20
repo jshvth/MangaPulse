@@ -161,9 +161,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     setError(null);
-    const { error: authError } = await supabase.auth.signOut();
-    if (authError) {
-      setError(authError.message);
+    try {
+      const { error: authError } = await supabase.auth.signOut();
+      if (authError) {
+        setError(authError.message);
+      }
+    } finally {
+      if (typeof window !== "undefined") {
+        clearSupabaseLocalSessions();
+      }
+      setSession(null);
+      setUser(null);
     }
   };
 
