@@ -15,6 +15,16 @@ type PublicProfile = {
   favorite_3: string | null;
 };
 
+type PublicCollectionItem = {
+  id: string;
+  title: string;
+  image_url: string | null;
+  total_volumes: number | null;
+  current_volume: number | null;
+  status: string | null;
+  updated_at: string | null;
+};
+
 export function PublicProfilePage() {
   const { id } = useParams();
   const { user } = useAuth();
@@ -24,6 +34,9 @@ export function PublicProfilePage() {
   const [following, setFollowing] = useState(false);
   const [followersCount, setFollowersCount] = useState(0);
   const [followLoading, setFollowLoading] = useState(false);
+  const [collection, setCollection] = useState<PublicCollectionItem[]>([]);
+  const [collectionLoading, setCollectionLoading] = useState(false);
+  const [collectionError, setCollectionError] = useState<string | null>(null);
 
   const isSelf = useMemo(() => user?.id === id, [user?.id, id]);
 
@@ -87,10 +100,55 @@ export function PublicProfilePage() {
     };
   }, [id, user?.id]);
 
+  useEffect(() => {
+    if (!id || !user) {
+      setCollection([]);
+      return;
+    }
+
+    let alive = true;
+    setCollectionLoading(true);
+    setCollectionError(null);
+
+    supabase
+      .from("user_mangas")
+      .select("id, title, image_url, total_volumes, current_volume, status, updated_at")
+      .eq("user_id", id)
+      .order("updated_at", { ascending: false })
+      .limit(24)
+      .then(({ data, error }) => {
+        if (!alive) return;
+        if (error) {
+          setCollectionError(error.message);
+          setCollection([]);
+          return;
+        }
+        setCollection((data ?? []) as PublicCollectionItem[]);
+      })
+      .then(() => {
+        if (!alive) return;
+        setCollectionLoading(false);
+      });
+
+    return () => {
+      alive = false;
+    };
+  }, [id, user?.id]);
+
   const favorites = useMemo(() => {
     if (!profile) return [];
     return [profile.favorite_1, profile.favorite_2, profile.favorite_3].filter(Boolean);
   }, [profile]);
+
+  const totalOwned = useMemo(
+    () => collection.reduce((sum, item) => sum + (item.current_volume ?? 0), 0),
+    [collection]
+  );
+
+  const formatStatus = (status: string | null) => {
+    if (!status) return "Reading";
+    return status.charAt(0).toUpperCase() + status.slice(1);
+  };
 
   const handleToggleFollow = async () => {
     if (!id || !user) return;
@@ -195,6 +253,94 @@ export function PublicProfilePage() {
           </div>
         </section>
       )}
+
+      <section className="glass-card hover-lift reveal reveal-delay-3 rounded-[32px] p-6 md:p-8">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <p className="label">Collection</p>
+            <h3 className="font-display text-2xl">Shelf overview</h3>
+            <p className="text-sm text-ink/60">
+              Browse the manga this collector is tracking.
+            </p>
+          </div>
+          {user && (
+            <div className="flex items-center gap-2">
+              <span className="chip">{collection.length} series</span>
+              <span className="chip">{totalOwned} volumes</span>
+            </div>
+          )}
+        </div>
+
+        {!user && (
+          <div className="neo-panel mt-6 rounded-2xl p-4 text-sm text-ink/70">
+            Sign in to view their collection.
+          </div>
+        )}
+
+        {user && collectionError && (
+          <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {collectionError}
+          </div>
+        )}
+
+        {user && collectionLoading && (
+          <div className="neo-panel mt-6 rounded-2xl p-4 text-sm text-ink/70">
+            Loading collection...
+          </div>
+        )}
+
+        {user && !collectionLoading && collection.length === 0 && (
+          <div className="neo-panel mt-6 rounded-2xl p-4 text-sm text-ink/70">
+            No titles added yet.
+          </div>
+        )}
+
+        {user && collection.length > 0 && (
+          <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {collection.map((item) => {
+              const progress = item.total_volumes
+                ? `${item.current_volume ?? 0}/${item.total_volumes}`
+                : `${item.current_volume ?? 0}/?`;
+              const progressPct = item.total_volumes
+                ? Math.min(
+                    ((item.current_volume ?? 0) / item.total_volumes) * 100,
+                    100
+                  )
+                : 0;
+
+              return (
+                <div key={item.id} className="neo-panel rounded-3xl p-4">
+                  <div className="flex items-center gap-4">
+                    <img
+                      src={item.image_url ?? "/placeholder-cover.svg"}
+                      alt={item.title}
+                      className="h-20 w-14 rounded-xl object-cover shadow-sm"
+                    />
+                    <div className="flex-1">
+                      <p className="font-semibold text-ink">{item.title}</p>
+                      <p className="text-xs text-ink/60">{progress} volumes</p>
+                      <div className="mt-2 flex items-center gap-2">
+                        <span className="chip text-[10px]">{formatStatus(item.status)}</span>
+                        {item.total_volumes && (
+                          <span className="text-[11px] text-ink/50">
+                            {item.total_volumes} total
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-4 h-2 rounded-full bg-white/60">
+                    <div
+                      className="h-full rounded-full bg-accent/70"
+                      style={{ width: `${progressPct}%` }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </section>
     </div>
   );
 }
