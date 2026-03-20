@@ -75,6 +75,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
     if (authError) {
       setError(authError.message);
+      return;
+    }
+
+    const { data } = await supabase.auth.getUser();
+    const confirmed =
+      data?.user?.email_confirmed_at || (data?.user as any)?.confirmed_at;
+    if (!confirmed) {
+      await supabase.auth.signOut();
+      setError("Please confirm your email before signing in.");
     }
   };
 

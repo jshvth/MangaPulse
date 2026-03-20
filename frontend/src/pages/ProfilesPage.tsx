@@ -185,11 +185,11 @@ export function ProfilesPage() {
             <Link
               key={profile.user_id}
               to={`/profiles/${profile.user_id}`}
-              className="glass-card hover-lift rounded-3xl p-5"
+              className="glass-card neo-panel hover-lift rounded-3xl p-5"
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-center gap-4">
-                  <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border border-ink/10 bg-white">
+                  <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border border-ink/10 bg-mist/80">
                     {profile.avatar_url ? (
                       <img
                         src={profile.avatar_url}
@@ -210,7 +210,7 @@ export function ProfilesPage() {
                         : "Location hidden"}
                     </p>
                     {followingIds.includes(profile.user_id) && (
-                      <span className="mt-2 inline-flex rounded-full bg-ink/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-ink/60">
+                      <span className="mt-2 inline-flex rounded-full bg-accent/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-accent">
                         Following
                       </span>
                     )}
@@ -246,7 +246,7 @@ export function ProfilesPage() {
           ))}
         </div>
         {!loading && sortedResults.length === 0 && query.trim() && (
-          <div className="mt-6 rounded-2xl border border-ink/10 bg-white/70 p-4 text-sm text-ink/60">
+          <div className="neo-panel mt-6 rounded-2xl p-4 text-sm text-ink/70">
             No profiles found. Try another search.
           </div>
         )}

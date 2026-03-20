@@ -118,7 +118,7 @@ export function CollectionPage() {
               {results.map((item) => (
                 <div
                   key={`${item.source}-${item.sourceId}`}
-                  className="flex flex-col gap-4 rounded-2xl border border-ink/10 bg-white/80 p-4 md:flex-row md:items-center md:justify-between"
+                  className="neo-panel flex flex-col gap-4 rounded-2xl p-4 md:flex-row md:items-center md:justify-between"
                 >
                 <div className="flex items-center gap-4">
                   <img
@@ -133,7 +133,7 @@ export function CollectionPage() {
                         ? `${item.totalVolumes} volumes`
                         : "Volumes unknown"}
                     </p>
-                        <span className="mt-2 inline-flex rounded-full bg-ink/5 px-2 py-0.5 text-[10px] uppercase tracking-[0.2em] text-ink/50">
+                        <span className="mt-2 inline-flex rounded-full bg-accent/15 px-2 py-0.5 text-[10px] uppercase tracking-[0.2em] text-accent">
                           {item.source}
                         </span>
                       </div>
