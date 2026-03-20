@@ -9,6 +9,7 @@
 - Frontend blocks access to Collection/Community/Profile when not authed.
 - Email confirmation can be required before sign-in.
 - Remember me toggle uses localStorage vs sessionStorage.
+- Signup swaps to a confirmation state after submit.
 
 **Key UI**
 - `AuthPage` for email/password login.
