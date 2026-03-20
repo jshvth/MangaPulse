@@ -82,9 +82,13 @@ export function ProfilesPage() {
       .limit(30);
 
     if (mode === "name") {
-      request = request.ilike("display_name_search", `%${normalized}%`);
+      request = request.or(
+        `display_name_search.ilike.%${normalized}%,display_name.ilike.%${trimmed}%`
+      );
     } else {
-      request = request.ilike("location_city_search", `%${normalized}%`);
+      request = request.or(
+        `location_city_search.ilike.%${normalized}%,location_city.ilike.%${trimmed}%`
+      );
     }
 
     const { data, error } = await request;
