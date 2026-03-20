@@ -7,6 +7,7 @@
 - Search profiles by **name** or **city**.
 - Follow/unfollow from search results.
 - Profile page shows followers + following lists.
+- Profiles are auto-created on signup (display name seeded).
 
 **Data / Tables**
 - `user_profiles`

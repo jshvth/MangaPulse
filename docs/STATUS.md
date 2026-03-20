@@ -7,6 +7,7 @@ This document summarizes what is implemented, what is not fully working yet (and
 
 **Working (Implemented)**
 - Auth with Supabase (sign up, sign in, sign out)
+- Email confirmation required before sign-in
 - Persistent user collection stored in `user_mangas`
 - Search via Jikan + AniList fallback
 - Manga detail page with progress, status, and Amazon link

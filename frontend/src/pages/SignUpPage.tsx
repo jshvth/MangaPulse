@@ -7,6 +7,8 @@ export function SignUpPage() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [notice, setNotice] = useState<string | null>(null);
   const [remember, setRemember] = useState(() => {
     if (typeof window === "undefined") return true;
@@ -15,7 +17,10 @@ export function SignUpPage() {
 
   const handleSignUp = async () => {
     setNotice("Account created. If email confirmation is enabled, check your inbox.");
-    await signUp(email, password, remember);
+    const ok = await signUp(email, password, remember, { firstName, lastName });
+    if (ok) {
+      navigate(`/signup/confirm?email=${encodeURIComponent(email)}`);
+    }
   };
 
   useEffect(() => {
@@ -36,6 +41,26 @@ export function SignUpPage() {
             </p>
           </div>
           <div className="space-y-4">
+            <div className="grid gap-3 md:grid-cols-2">
+              <label className="grid gap-2 text-sm">
+                <span className="text-ink/60">First name</span>
+                <input
+                  className="input-field"
+                  placeholder="First name"
+                  value={firstName}
+                  onChange={(event) => setFirstName(event.target.value)}
+                />
+              </label>
+              <label className="grid gap-2 text-sm">
+                <span className="text-ink/60">Last name</span>
+                <input
+                  className="input-field"
+                  placeholder="Last name"
+                  value={lastName}
+                  onChange={(event) => setLastName(event.target.value)}
+                />
+              </label>
+            </div>
             <label className="grid gap-2 text-sm">
               <span className="text-ink/60">Email</span>
               <input
@@ -76,7 +101,11 @@ export function SignUpPage() {
             </div>
           )}
           <div className="flex flex-col gap-3">
-            <button className="btn-primary" onClick={handleSignUp}>
+            <button
+              className="btn-primary"
+              onClick={handleSignUp}
+              disabled={!firstName.trim() || !lastName.trim()}
+            >
               Create account
             </button>
             <Link to="/" className="btn-ghost text-center">

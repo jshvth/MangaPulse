@@ -9,7 +9,12 @@ type AuthContextValue = {
   session: Session | null;
   error: string | null;
   signIn: (email: string, password: string, remember: boolean) => Promise<void>;
-  signUp: (email: string, password: string, remember: boolean) => Promise<void>;
+  signUp: (
+    email: string,
+    password: string,
+    remember: boolean,
+    profile: { firstName: string; lastName: string }
+  ) => Promise<boolean>;
   signOut: () => Promise<void>;
 };
 
@@ -20,6 +25,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const buildDisplayName = (firstName?: string, lastName?: string) => {
+    const parts = [firstName?.trim(), lastName?.trim()].filter(Boolean);
+    return parts.length ? parts.join(" ") : null;
+  };
+
+  const friendlyAuthError = (message: string) => {
+    if (message.toLowerCase().includes("already registered")) {
+      return "This email is already registered. Try signing in instead.";
+    }
+    return message;
+  };
 
   useEffect(() => {
     let isMounted = true;
@@ -36,10 +53,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
 
     const { data: subscription } = supabase.auth.onAuthStateChange(
-      (_event, nextSession) => {
+      async (_event, nextSession) => {
         if (!isMounted) return;
         setSession(nextSession);
         setUser(nextSession?.user ?? null);
+        if (nextSession?.user) {
+          const metadata = nextSession.user.user_metadata ?? {};
+          const displayName = buildDisplayName(metadata.first_name, metadata.last_name);
+          if (displayName) {
+            const { data: existing } = await supabase
+              .from("user_profiles")
+              .select("display_name")
+              .eq("user_id", nextSession.user.id)
+              .maybeSingle();
+            if (!existing || !existing.display_name) {
+              await supabase.from("user_profiles").upsert({
+                user_id: nextSession.user.id,
+                display_name: displayName,
+              });
+            }
+          }
+        }
       }
     );
 
@@ -87,7 +121,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const signUp = async (email: string, password: string, remember: boolean) => {
+  const signUp = async (
+    email: string,
+    password: string,
+    remember: boolean,
+    profile: { firstName: string; lastName: string }
+  ) => {
     setError(null);
     if (typeof window !== "undefined") {
       window.localStorage.setItem("mp_remember", remember ? "1" : "0");
@@ -104,11 +143,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { error: authError } = await supabase.auth.signUp({
       email,
       password,
-      options: emailRedirectTo ? { emailRedirectTo } : undefined,
+      options: {
+        emailRedirectTo,
+        data: {
+          first_name: profile.firstName.trim(),
+          last_name: profile.lastName.trim(),
+          display_name: buildDisplayName(profile.firstName, profile.lastName),
+        },
+      },
     });
     if (authError) {
-      setError(authError.message);
+      setError(friendlyAuthError(authError.message));
+      return false;
     }
+    return true;
   };
 
   const signOut = async () => {

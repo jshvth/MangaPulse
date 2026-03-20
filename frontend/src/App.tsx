@@ -2,6 +2,7 @@ import { Routes, Route } from "react-router-dom";
 import { BackgroundDecor } from "./components/BackgroundDecor";
 import { TopNav } from "./components/TopNav";
 import { AuthPage } from "./pages/AuthPage";
+import { ConfirmEmailPage } from "./pages/ConfirmEmailPage";
 import { SignUpPage } from "./pages/SignUpPage";
 import { CollectionPage } from "./pages/CollectionPage";
 import { MangaDetailPage } from "./pages/MangaDetailPage";
@@ -19,6 +20,7 @@ function App() {
         <Routes>
           <Route path="/" element={<AuthPage />} />
           <Route path="/signup" element={<SignUpPage />} />
+          <Route path="/signup/confirm" element={<ConfirmEmailPage />} />
           <Route
             path="/collection"
             element={

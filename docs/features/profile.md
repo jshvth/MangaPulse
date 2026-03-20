@@ -7,6 +7,7 @@
 - Profile fields: display name, city, country, bio, top 3 favorites.
 - Avatar upload stored in Supabase Storage (`avatars` bucket).
 - Public profile view available.
+- Display name can be seeded from signup metadata (first/last name).
 
 **Data / Tables**
 - `user_profiles`
