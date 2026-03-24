@@ -1,26 +1,23 @@
 # MangaPulse
 
-MangaPulse is a KI-native web app for tracking manga collections and surfacing new releases on a 3-day cadence. It combines Jikan + AniList data, stores your library in Supabase, and surfaces new-volume signals in the UI.
+MangaPulse is a KI-native web app for tracking manga collections and surfacing new releases on a 3‑day cadence. It blends Jikan + AniList data, stores your library in Supabase, and highlights new-volume signals directly in the UI.
 
-**Docs**
-- `docs/SETUP.md`
-- `docs/DEPLOYMENT.md`
-- `docs/ARCHITECTURE.md`
-- `docs/STATUS.md`
-- `docs/features/README.md`
+**Quick Links**
+- `docs/SETUP.md` (local setup)
+- `docs/DEPLOYMENT.md` (Vercel + Supabase)
+- `docs/ARCHITECTURE.md` (system overview)
+- `docs/STATUS.md` (what’s done, blockers, alternatives)
+- `docs/features/README.md` (feature index)
 
-**Features**
-- Collection dashboard with progress tracking
-- Search powered by Jikan + AniList
-- Release history and notification flags
+**Core Features**
+- Collection dashboard with progress tracking and status
+- Jikan + AniList search with fallback logic
+- Release history, upcoming entries, and Pulse notifications
 - Supabase Auth + Postgres persistence
 - Edge Function release scan (cron)
-- Per-volume checklist and manual upcoming releases
 - Community profiles + follow system
-- OpenStreetMap bookstores (no API key)
-
-**Feature Docs Index**
-- `docs/features/README.md`
+- Public profile view with read‑only collection preview (signed‑in users)
+- OpenStreetMap + Overpass bookstore lookup (no paid API key)
 
 **Data Sources**
 - Jikan (MyAnimeList data)
